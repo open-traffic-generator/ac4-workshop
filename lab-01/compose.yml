@@ -8,9 +8,7 @@ services:
     image: ghcr.io/open-traffic-generator/ixia-c-traffic-engine:1.8.0.245
     restart: always
     privileged: true
-    ports:
-      - "5551:5551"
-      - "50071:50071"
+    network_mode: "host"
     environment:
       - OPT_LISTEN_PORT=5551
       - ARG_IFACE_LIST=virtual@af_packet,ens192
