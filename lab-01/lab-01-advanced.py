@@ -58,8 +58,8 @@ def Test_ebgp_route_prefix():
 
 def ebgp_route_prefix_config(api, tc):
     c = api.config()
-    p1 = c.ports.add(name="p1", location="localhost:5551+localhost:50071")
-    p2 = c.ports.add(name="p2", location="10.24.50.227:5551+10.24.50.227:50071")
+    p1 = c.ports.add(name="p1", location="10.0.10.12:5551+10.0.10.12:50071")
+    p2 = c.ports.add(name="p2", location="10.0.10.11:5551+10.0.10.11:50071")
     
     # capture configuration
 
