@@ -11,12 +11,12 @@ def Test_ebgp_route_prefix():
         "pktCount": 1000,
         "pktSize": 128,
         "trafficDuration": 20,
-        "txMac": "00:00:01:01:01:01",
+        "txMac": "00:AA:00:00:01:00",
         "txIp": "1.1.1.1",
         "txGateway": "1.1.1.2",
         "txPrefix": 24,
         "txAs": 1111,
-        "rxMac": "00:00:01:01:01:02",
+        "rxMac": "00:AA:00:00:02:00",
         "rxIp": "1.1.1.2",
         "rxGateway": "1.1.1.1",
         "rxPrefix": 4,
@@ -60,7 +60,7 @@ def Test_ebgp_route_prefix():
 def ebgp_route_prefix_config(api, tc):
     c = api.config()
     ptx = c.ports.add(name="ptx", location="localhost:5551+localhost:50071")
-    prx = c.ports.add(name="prx", location="localhost:5552+localhost:50072")
+    prx = c.ports.add(name="prx", location="10.24.50.227:5551+10.24.50.227:50071")
     
     # capture configuration
 
@@ -413,8 +413,10 @@ def get_flow_metrics(api):
             "State",
             "Frames Tx",
             "Frames Rx",
-            "FPS Tx",
-            "FPS Rx",
+            "Framerate Tx",
+            "Framerate Rx",
+            "Bitrate Tx",
+            "Bitrate Rx",
             "Bytes Tx",
             "Bytes Rx",
         ],
@@ -429,12 +431,15 @@ def get_flow_metrics(api):
                 m.frames_rx,
                 m.frames_tx_rate,
                 m.frames_rx_rate,
+                m.tx_rate_bps,
+                m.rx_rate_bps,
                 m.bytes_tx,
                 m.bytes_rx,
             ]
         )
     print(tb)
     return metrics
+
 
 def start_protocols(api):
     print("%s Starting protocols    ..." % datetime.now())
