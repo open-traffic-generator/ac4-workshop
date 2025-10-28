@@ -5,32 +5,31 @@ import time
 
    
 def Test_ebgp_route_prefix():
-    # TODO: add support for BGP for IPv6 as well
     test_const = {
         "pktRate": 200,
         "pktCount": 1000,
         "pktSize": 128,
         "trafficDuration": 20,
-        "txMac": "00:AA:00:00:01:00",
-        "txIp": "1.1.1.1",
-        "txGateway": "1.1.1.2",
-        "txPrefix": 24,
-        "txAs": 1111,
-        "rxMac": "00:AA:00:00:02:00",
-        "rxIp": "1.1.1.2",
-        "rxGateway": "1.1.1.1",
-        "rxPrefix": 4,
-        "rxAs": 1112,
-        "txRouteCount": 5,
-        "rxRouteCount": 5,
-        "txNextHopV4": "1.1.1.3",
-        "txNextHopV6": "::1:1:1:3",
-        "rxNextHopV4": "1.1.1.4",
-        "rxNextHopV6": "::1:1:1:4",
-        "txAdvRouteV4": "10.10.10.1",
-        "rxAdvRouteV4": "20.20.20.1",
-        "txAdvRouteV6": "::10:10:10:1",
-        "rxAdvRouteV6": "::20:20:20:1",
+        "p1Mac": "0a:ff:d8:c7:9d:0b",
+        "p1Ip": "10.0.2.22",
+        "p1Gateway": "10.0.2.1",
+        "p1Prefix": 24,
+        "p1As": 1111,
+        "p2Mac": "0a:ff:c7:75:c5:bf",
+        "p2Ip": "10.0.2.12",
+        "p2Gateway": "10.0.2.1",
+        "p2Prefix": 24,
+        "p2As": 1112,
+        "p1RouteCount": 5,
+        "p2RouteCount": 5,
+        "p1NextHopV4": "1.1.1.3",
+        "p1NextHopV6": "::1:1:1:3",
+        "p2NextHopV4": "1.1.1.4",
+        "p2NextHopV6": "::1:1:1:4",
+        "p1AdvRouteV4": "10.10.10.1",
+        "p2AdvRouteV4": "20.20.20.1",
+        "p1AdvRouteV6": "::10:10:10:1",
+        "p2AdvRouteV6": "::20:20:20:1",
     }
 
     api = snappi.api(location="https://localhost:8443", verify=False)
@@ -53,174 +52,174 @@ def Test_ebgp_route_prefix():
 
     # stop_capture(api)
 
-    # get_capture(api, "prx", "prx.pcap")
-    # get_capture(api, "ptx", "ptx.pcap")
+    # get_capture(api, "p2", "p2.pcap")
+    # get_capture(api, "p1", "p1.pcap")
 
 
 def ebgp_route_prefix_config(api, tc):
     c = api.config()
-    ptx = c.ports.add(name="ptx", location="localhost:5551+localhost:50071")
-    prx = c.ports.add(name="prx", location="10.24.50.227:5551+10.24.50.227:50071")
+    p1 = c.ports.add(name="p1", location="localhost:5551+localhost:50071")
+    p2 = c.ports.add(name="p2", location="10.24.50.227:5551+10.24.50.227:50071")
     
     # capture configuration
 
-    rx_capture = c.captures.add(name="prx_capture")
-    rx_capture.set(port_names=["prx"],format="pcap",overwrite=True)
+    p2_capture = c.captures.add(name="p2_capture")
+    p2_capture.set(port_names=["p2"],format="pcap",overwrite=True)
     
-    tx_capture = c.captures.add(name="ptx_capture")
-    tx_capture.set(port_names=["ptx"],format="pcap",overwrite=True)
+    p1_capture = c.captures.add(name="p1_capture")
+    p1_capture.set(port_names=["p1"],format="pcap",overwrite=True)
 
-    dtx = c.devices.add(name="dtx")
-    drx = c.devices.add(name="drx")
+    d1 = c.devices.add(name="d1")
+    d2 = c.devices.add(name="d2")
 
-    dtx_eth = dtx.ethernets.add(name="dtx_eth")
-    dtx_eth.connection.port_name = ptx.name
-    dtx_eth.mac = tc["txMac"]
-    dtx_eth.mtu = 1500
+    d1_eth = d1.ethernets.add(name="d1_eth")
+    d1_eth.connection.port_name = p1.name
+    d1_eth.mac = tc["p1Mac"]
+    d1_eth.mtu = 1500
 
-    dtx_ip = dtx_eth.ipv4_addresses.add(name="dtx_ip")
-    dtx_ip.set(address=tc["txIp"], gateway=tc["txGateway"], prefix=tc["txPrefix"])
+    d1_ip = d1_eth.ipv4_addresses.add(name="d1_ip")
+    d1_ip.set(address=tc["p1Ip"], gateway=tc["p1Gateway"], prefix=tc["p1Prefix"])
 
-    dtx.bgp.router_id = tc["txIp"]
+    d1.bgp.router_id = tc["p1Ip"]
 
-    dtx_bgpv4 = dtx.bgp.ipv4_interfaces.add(ipv4_name=dtx_ip.name)
+    d1_bgpv4 = d1.bgp.ipv4_interfaces.add(ipv4_name=d1_ip.name)
 
-    dtx_bgpv4_peer = dtx_bgpv4.peers.add(name="dtx_bgpv4_peer")
-    dtx_bgpv4_peer.set(
-        as_number=tc["txAs"], as_type=dtx_bgpv4_peer.EBGP, peer_address=tc["txGateway"]
+    d1_bgpv4_peer = d1_bgpv4.peers.add(name="d1_bgpv4_peer")
+    d1_bgpv4_peer.set(
+        as_number=tc["p1As"], as_type=d1_bgpv4_peer.EBGP, peer_address=tc["p1Gateway"]
     )
-    dtx_bgpv4_peer.learned_information_filter.set(
+    d1_bgpv4_peer.learned_information_filter.set(
         unicast_ipv4_prefix=True, unicast_ipv6_prefix=True
     )
 
-    dtx_bgpv4_peer_rrv4 = dtx_bgpv4_peer.v4_routes.add(name="dtx_bgpv4_peer_rrv4")
-    dtx_bgpv4_peer_rrv4.set(
-        next_hop_ipv4_address=tc["txNextHopV4"],
-        next_hop_address_type=dtx_bgpv4_peer_rrv4.IPV4,
-        next_hop_mode=dtx_bgpv4_peer_rrv4.MANUAL,
+    d1_bgpv4_peer_rrv4 = d1_bgpv4_peer.v4_routes.add(name="d1_bgpv4_peer_rrv4")
+    d1_bgpv4_peer_rrv4.set(
+        next_hop_ipv4_address=tc["p1NextHopV4"],
+        next_hop_address_type=d1_bgpv4_peer_rrv4.IPV4,
+        next_hop_mode=d1_bgpv4_peer_rrv4.MANUAL,
     )
 
-    dtx_bgpv4_peer_rrv4.addresses.add(
-        address=tc["txAdvRouteV4"], prefix=32, count=tc["txRouteCount"], step=1
+    d1_bgpv4_peer_rrv4.addresses.add(
+        address=tc["p1AdvRouteV4"], prefix=32, count=tc["p1RouteCount"], step=1
     )
 
-    dtx_bgpv4_peer_rrv4.advanced.set(
-        multi_exit_discriminator=50, origin=dtx_bgpv4_peer_rrv4.advanced.EGP
+    d1_bgpv4_peer_rrv4.advanced.set(
+        multi_exit_discriminator=50, origin=d1_bgpv4_peer_rrv4.advanced.EGP
     )
 
-    dtx_bgpv4_peer_rrv4_com = dtx_bgpv4_peer_rrv4.communities.add(
+    d1_bgpv4_peer_rrv4_com = d1_bgpv4_peer_rrv4.communities.add(
         as_number=1,
         as_custom=2,
     )
-    dtx_bgpv4_peer_rrv4_com.type = dtx_bgpv4_peer_rrv4_com.MANUAL_AS_NUMBER
+    d1_bgpv4_peer_rrv4_com.type = d1_bgpv4_peer_rrv4_com.MANUAL_AS_NUMBER
 
-    dtx_bgpv4_peer_rrv4.as_path.as_set_mode = dtx_bgpv4_peer_rrv4.as_path.INCLUDE_AS_SET
+    d1_bgpv4_peer_rrv4.as_path.as_set_mode = d1_bgpv4_peer_rrv4.as_path.INCLUDE_AS_SET
 
-    dtx_bgpv4_peer_rrv4_seg = dtx_bgpv4_peer_rrv4.as_path.segments.add()
-    dtx_bgpv4_peer_rrv4_seg.set(
-        as_numbers=[1112, 1113], type=dtx_bgpv4_peer_rrv4_seg.AS_SEQ
+    d1_bgpv4_peer_rrv4_seg = d1_bgpv4_peer_rrv4.as_path.segments.add()
+    d1_bgpv4_peer_rrv4_seg.set(
+        as_numbers=[1112, 1113], type=d1_bgpv4_peer_rrv4_seg.AS_SEQ
     )
 
-    dtx_bgpv4_peer_rrv6 = dtx_bgpv4_peer.v6_routes.add(name="dtx_bgpv4_peer_rrv6")
-    dtx_bgpv4_peer_rrv6.set(
-        next_hop_ipv6_address=tc["txNextHopV6"],
-        next_hop_address_type=dtx_bgpv4_peer_rrv6.IPV6,
-        next_hop_mode=dtx_bgpv4_peer_rrv6.MANUAL,
+    d1_bgpv4_peer_rrv6 = d1_bgpv4_peer.v6_routes.add(name="d1_bgpv4_peer_rrv6")
+    d1_bgpv4_peer_rrv6.set(
+        next_hop_ipv6_address=tc["p1NextHopV6"],
+        next_hop_address_type=d1_bgpv4_peer_rrv6.IPV6,
+        next_hop_mode=d1_bgpv4_peer_rrv6.MANUAL,
     )
 
-    dtx_bgpv4_peer_rrv6.addresses.add(
-        address=tc["txAdvRouteV6"], prefix=128, count=tc["txRouteCount"], step=1
+    d1_bgpv4_peer_rrv6.addresses.add(
+        address=tc["p1AdvRouteV6"], prefix=128, count=tc["p1RouteCount"], step=1
     )
 
-    dtx_bgpv4_peer_rrv6.advanced.set(
-        multi_exit_discriminator=50, origin=dtx_bgpv4_peer_rrv6.advanced.EGP
+    d1_bgpv4_peer_rrv6.advanced.set(
+        multi_exit_discriminator=50, origin=d1_bgpv4_peer_rrv6.advanced.EGP
     )
 
-    dtx_bgpv4_peer_rrv6_com = dtx_bgpv4_peer_rrv6.communities.add(
+    d1_bgpv4_peer_rrv6_com = d1_bgpv4_peer_rrv6.communities.add(
         as_number=1, as_custom=2
     )
-    dtx_bgpv4_peer_rrv6_com.type = dtx_bgpv4_peer_rrv6_com.MANUAL_AS_NUMBER
+    d1_bgpv4_peer_rrv6_com.type = d1_bgpv4_peer_rrv6_com.MANUAL_AS_NUMBER
 
-    dtx_bgpv4_peer_rrv6.as_path.as_set_mode = dtx_bgpv4_peer_rrv6.as_path.INCLUDE_AS_SET
+    d1_bgpv4_peer_rrv6.as_path.as_set_mode = d1_bgpv4_peer_rrv6.as_path.INCLUDE_AS_SET
 
-    dtx_bgpv4_peer_rrv6_seg = dtx_bgpv4_peer_rrv6.as_path.segments.add()
-    dtx_bgpv4_peer_rrv6_seg.set(
-        as_numbers=[1112, 1113], type=dtx_bgpv4_peer_rrv6_seg.AS_SEQ
+    d1_bgpv4_peer_rrv6_seg = d1_bgpv4_peer_rrv6.as_path.segments.add()
+    d1_bgpv4_peer_rrv6_seg.set(
+        as_numbers=[1112, 1113], type=d1_bgpv4_peer_rrv6_seg.AS_SEQ
     )
 
-    drx_eth = drx.ethernets.add(name="drx_eth")
-    drx_eth.connection.port_name = prx.name
-    drx_eth.mac = tc["rxMac"]
-    drx_eth.mtu = 1500
+    d2_eth = d2.ethernets.add(name="d2_eth")
+    d2_eth.connection.port_name = p2.name
+    d2_eth.mac = tc["p2Mac"]
+    d2_eth.mtu = 1500
 
-    drx_ip = drx_eth.ipv4_addresses.add(name="drx_ip")
-    drx_ip.set(address=tc["rxIp"], gateway=tc["rxGateway"], prefix=tc["rxPrefix"])
+    d2_ip = d2_eth.ipv4_addresses.add(name="d2_ip")
+    d2_ip.set(address=tc["p2Ip"], gateway=tc["p2Gateway"], prefix=tc["p2Prefix"])
 
-    drx.bgp.router_id = tc["rxIp"]
+    d2.bgp.router_id = tc["p2Ip"]
 
-    drx_bgpv4 = drx.bgp.ipv4_interfaces.add()
-    drx_bgpv4.ipv4_name = drx_ip.name
+    d2_bgpv4 = d2.bgp.ipv4_interfaces.add()
+    d2_bgpv4.ipv4_name = d2_ip.name
 
-    drx_bgpv4_peer = drx_bgpv4.peers.add(name="drx_bgpv4_peer")
-    drx_bgpv4_peer.set(
-        as_number=tc["rxAs"], as_type=drx_bgpv4_peer.EBGP, peer_address=tc["rxGateway"]
+    d2_bgpv4_peer = d2_bgpv4.peers.add(name="d2_bgpv4_peer")
+    d2_bgpv4_peer.set(
+        as_number=tc["p2As"], as_type=d2_bgpv4_peer.EBGP, peer_address=tc["p2Gateway"]
     )
-    drx_bgpv4_peer.learned_information_filter.set(
+    d2_bgpv4_peer.learned_information_filter.set(
         unicast_ipv4_prefix=True, unicast_ipv6_prefix=True
     )
 
-    drx_bgpv4_peer_rrv4 = drx_bgpv4_peer.v4_routes.add(name="drx_bgpv4_peer_rrv4")
-    drx_bgpv4_peer_rrv4.set(
-        next_hop_ipv4_address=tc["rxNextHopV4"],
-        next_hop_address_type=drx_bgpv4_peer_rrv4.IPV4,
-        next_hop_mode=drx_bgpv4_peer_rrv4.MANUAL,
+    d2_bgpv4_peer_rrv4 = d2_bgpv4_peer.v4_routes.add(name="d2_bgpv4_peer_rrv4")
+    d2_bgpv4_peer_rrv4.set(
+        next_hop_ipv4_address=tc["p2NextHopV4"],
+        next_hop_address_type=d2_bgpv4_peer_rrv4.IPV4,
+        next_hop_mode=d2_bgpv4_peer_rrv4.MANUAL,
     )
 
-    drx_bgpv4_peer_rrv4.addresses.add(
-        address=tc["rxAdvRouteV4"], prefix=32, count=tc["rxRouteCount"], step=1
+    d2_bgpv4_peer_rrv4.addresses.add(
+        address=tc["p2AdvRouteV4"], prefix=32, count=tc["p2RouteCount"], step=1
     )
 
-    drx_bgpv4_peer_rrv4.advanced.set(
-        multi_exit_discriminator=50, origin=drx_bgpv4_peer_rrv4.advanced.EGP
+    d2_bgpv4_peer_rrv4.advanced.set(
+        multi_exit_discriminator=50, origin=d2_bgpv4_peer_rrv4.advanced.EGP
     )
 
-    drx_bgpv4_peer_rrv4_com = drx_bgpv4_peer_rrv4.communities.add(
+    d2_bgpv4_peer_rrv4_com = d2_bgpv4_peer_rrv4.communities.add(
         as_number=1, as_custom=2
     )
-    drx_bgpv4_peer_rrv4_com.type = drx_bgpv4_peer_rrv4_com.MANUAL_AS_NUMBER
+    d2_bgpv4_peer_rrv4_com.type = d2_bgpv4_peer_rrv4_com.MANUAL_AS_NUMBER
 
-    drx_bgpv4_peer_rrv4.as_path.as_set_mode = drx_bgpv4_peer_rrv4.as_path.INCLUDE_AS_SET
+    d2_bgpv4_peer_rrv4.as_path.as_set_mode = d2_bgpv4_peer_rrv4.as_path.INCLUDE_AS_SET
 
-    drx_bgpv4_peer_rrv4_seg = drx_bgpv4_peer_rrv4.as_path.segments.add()
-    drx_bgpv4_peer_rrv4_seg.set(
-        as_numbers=[1112, 1113], type=drx_bgpv4_peer_rrv4_seg.AS_SEQ
+    d2_bgpv4_peer_rrv4_seg = d2_bgpv4_peer_rrv4.as_path.segments.add()
+    d2_bgpv4_peer_rrv4_seg.set(
+        as_numbers=[1112, 1113], type=d2_bgpv4_peer_rrv4_seg.AS_SEQ
     )
 
-    drx_bgpv4_peer_rrv6 = drx_bgpv4_peer.v6_routes.add(name="drx_bgpv4_peer_rrv6")
-    drx_bgpv4_peer_rrv6.set(
-        next_hop_ipv6_address=tc["rxNextHopV6"],
-        next_hop_address_type=drx_bgpv4_peer_rrv6.IPV6,
-        next_hop_mode=drx_bgpv4_peer_rrv6.MANUAL,
+    d2_bgpv4_peer_rrv6 = d2_bgpv4_peer.v6_routes.add(name="d2_bgpv4_peer_rrv6")
+    d2_bgpv4_peer_rrv6.set(
+        next_hop_ipv6_address=tc["p2NextHopV6"],
+        next_hop_address_type=d2_bgpv4_peer_rrv6.IPV6,
+        next_hop_mode=d2_bgpv4_peer_rrv6.MANUAL,
     )
 
-    drx_bgpv4_peer_rrv6.addresses.add(
-        address=tc["rxAdvRouteV6"], prefix=128, count=tc["rxRouteCount"], step=1
+    d2_bgpv4_peer_rrv6.addresses.add(
+        address=tc["p2AdvRouteV6"], prefix=128, count=tc["p2RouteCount"], step=1
     )
 
-    drx_bgpv4_peer_rrv6.advanced.set(
-        multi_exit_discriminator=50, origin=drx_bgpv4_peer_rrv6.advanced.EGP
+    d2_bgpv4_peer_rrv6.advanced.set(
+        multi_exit_discriminator=50, origin=d2_bgpv4_peer_rrv6.advanced.EGP
     )
 
-    drx_bgpv4_peer_rrv6_com = drx_bgpv4_peer_rrv6.communities.add(
+    d2_bgpv4_peer_rrv6_com = d2_bgpv4_peer_rrv6.communities.add(
         as_number=1, as_custom=2
     )
-    drx_bgpv4_peer_rrv6_com.type = drx_bgpv4_peer_rrv6_com.MANUAL_AS_NUMBER
+    d2_bgpv4_peer_rrv6_com.type = d2_bgpv4_peer_rrv6_com.MANUAL_AS_NUMBER
 
-    drx_bgpv4_peer_rrv6.as_path.as_set_mode = drx_bgpv4_peer_rrv6.as_path.INCLUDE_AS_SET
+    d2_bgpv4_peer_rrv6.as_path.as_set_mode = d2_bgpv4_peer_rrv6.as_path.INCLUDE_AS_SET
 
-    drx_bgpv4_peer_rrv6_seg = drx_bgpv4_peer_rrv6.as_path.segments.add()
-    drx_bgpv4_peer_rrv6_seg.set(
-        as_numbers=[1112, 1113], type=drx_bgpv4_peer_rrv6_seg.AS_SEQ
+    d2_bgpv4_peer_rrv6_seg = d2_bgpv4_peer_rrv6.as_path.segments.add()
+    d2_bgpv4_peer_rrv6_seg.set(
+        as_numbers=[1112, 1113], type=d2_bgpv4_peer_rrv6_seg.AS_SEQ
     )
 
     for i in range(0, 4):
@@ -230,57 +229,57 @@ def ebgp_route_prefix_config(api, tc):
         f.size.fixed = tc["pktSize"]
         f.metrics.enable = True
 
-    ftx_v4 = c.flows[0]
-    ftx_v4.name = "ftx_v4"
-    ftx_v4.tx_rx.device.set(
-        tx_names=[dtx_bgpv4_peer_rrv4.name], rx_names=[drx_bgpv4_peer_rrv4.name]
+    f1_v4 = c.flows[0]
+    f1_v4.name = "f1_v4"
+    f1_v4.tx_rx.device.set(
+        tx_names=[d1_bgpv4_peer_rrv4.name], rx_names=[d2_bgpv4_peer_rrv4.name]
     )
 
-    ftx_v4_eth, ftx_v4_ip, ftx_v4_udp = ftx_v4.packet.ethernet().ipv4().udp()
-    ftx_v4_eth.src.value = dtx_eth.mac
-    ftx_v4_ip.src.value = tc["txAdvRouteV4"]
-    ftx_v4_ip.dst.value = tc["rxAdvRouteV4"]
-    ftx_v4_udp.src_port.value = 5000
-    ftx_v4_udp.dst_port.value = 6000
+    f1_v4_eth, f1_v4_ip, f1_v4_tcp = f1_v4.packet.ethernet().ipv4().tcp()
+    f1_v4_eth.src.value = d1_eth.mac
+    f1_v4_ip.src.value = tc["p1AdvRouteV4"]
+    f1_v4_ip.dst.value = tc["p2AdvRouteV4"]
+    f1_v4_tcp.src_port.value = 5000
+    f1_v4_tcp.dst_port.value = 6000
 
-    ftx_v6 = c.flows[1]
-    ftx_v6.name = "ftx_v6"
-    ftx_v6.tx_rx.device.set(
-        tx_names=[dtx_bgpv4_peer_rrv6.name], rx_names=[drx_bgpv4_peer_rrv6.name]
+    f1_v6 = c.flows[1]
+    f1_v6.name = "f1_v6"
+    f1_v6.tx_rx.device.set(
+        tx_names=[d1_bgpv4_peer_rrv6.name], rx_names=[d2_bgpv4_peer_rrv6.name]
     )
 
-    ftx_v6_eth, ftx_v6_ip, ftx_v6_udp = ftx_v6.packet.ethernet().ipv6().udp()
-    ftx_v6_eth.src.value = dtx_eth.mac
-    ftx_v6_ip.src.value = tc["txAdvRouteV6"]
-    ftx_v6_ip.dst.value = tc["rxAdvRouteV6"]
-    ftx_v6_udp.src_port.value = 5000
-    ftx_v6_udp.dst_port.value = 6000
+    f1_v6_eth, f1_v6_ip, f1_v6_tcp = f1_v6.packet.ethernet().ipv6().tcp()
+    f1_v6_eth.src.value = d1_eth.mac
+    f1_v6_ip.src.value = tc["p1AdvRouteV6"]
+    f1_v6_ip.dst.value = tc["p2AdvRouteV6"]
+    f1_v6_tcp.src_port.value = 5000
+    f1_v6_tcp.dst_port.value = 6000
 
-    frx_v4 = c.flows[2]
-    frx_v4.name = "frx_v4"
-    frx_v4.tx_rx.device.set(
-        tx_names=[drx_bgpv4_peer_rrv4.name], rx_names=[dtx_bgpv4_peer_rrv4.name]
+    f2_v4 = c.flows[2]
+    f2_v4.name = "f2_v4"
+    f2_v4.tx_rx.device.set(
+        tx_names=[d2_bgpv4_peer_rrv4.name], rx_names=[d1_bgpv4_peer_rrv4.name]
     )
 
-    frx_v4_eth, frx_v4_ip, frx_v4_udp = frx_v4.packet.ethernet().ipv4().udp()
-    frx_v4_eth.src.value = drx_eth.mac
-    frx_v4_ip.src.value = tc["rxAdvRouteV4"]
-    frx_v4_ip.dst.value = tc["txAdvRouteV4"]
-    frx_v4_udp.src_port.value = 5000
-    frx_v4_udp.dst_port.value = 6000
+    f2_v4_eth, f2_v4_ip, f2_v4_tcp = f2_v4.packet.ethernet().ipv4().tcp()
+    f2_v4_eth.src.value = d2_eth.mac
+    f2_v4_ip.src.value = tc["p2AdvRouteV4"]
+    f2_v4_ip.dst.value = tc["p1AdvRouteV4"]
+    f2_v4_tcp.src_port.value = 5000
+    f2_v4_tcp.dst_port.value = 6000
 
-    frx_v6 = c.flows[3]
-    frx_v6.name = "frx_v6"
-    frx_v6.tx_rx.device.set(
-        tx_names=[drx_bgpv4_peer_rrv6.name], rx_names=[dtx_bgpv4_peer_rrv6.name]
+    f2_v6 = c.flows[3]
+    f2_v6.name = "f2_v6"
+    f2_v6.tx_rx.device.set(
+        tx_names=[d2_bgpv4_peer_rrv6.name], rx_names=[d1_bgpv4_peer_rrv6.name]
     )
 
-    frx_v6_eth, frx_v6_ip, frx_v6_udp = frx_v6.packet.ethernet().ipv6().udp()
-    frx_v6_eth.src.value = drx_eth.mac
-    frx_v6_ip.src.value = tc["rxAdvRouteV6"]
-    frx_v6_ip.dst.value = tc["txAdvRouteV6"]
-    frx_v6_udp.src_port.value = 5000
-    frx_v6_udp.dst_port.value = 6000
+    f2_v6_eth, f2_v6_ip, f2_v6_tcp = f2_v6.packet.ethernet().ipv6().tcp()
+    f2_v6_eth.src.value = d2_eth.mac
+    f2_v6_ip.src.value = tc["p2AdvRouteV6"]
+    f2_v6_ip.dst.value = tc["p1AdvRouteV6"]
+    f2_v6_tcp.src_port.value = 5000
+    f2_v6_tcp.dst_port.value = 6000
 
     # print("Config:\n%s", c)
     return c
@@ -289,8 +288,8 @@ def bgp_metrics_ok(api, tc):
     for m in get_bgpv4_metrics(api):
         if (
             m.session_state == m.DOWN
-            or m.routes_advertised != 2 * tc["txRouteCount"]
-            or m.routes_received != 2 * tc["rxRouteCount"]
+            or m.routes_advertised != 2 * tc["p1RouteCount"]
+            or m.routes_received != 2 * tc["p2RouteCount"]
         ):
             return False
     return True
@@ -299,14 +298,14 @@ def bgp_prefixes_ok(api, tc):
     prefix_count = 0
     for m in get_bgp_prefixes(api):
         for p in m.ipv4_unicast_prefixes:
-            for key in ["tx", "rx"]:
+            for key in ["p1", "p2"]:
                 if (
                     p.ipv4_address == tc[key + "AdvRouteV4"]
                     and p.ipv4_next_hop == tc[key + "NextHopV4"]
                 ):
                     prefix_count += 1
         for p in m.ipv6_unicast_prefixes:
-            for key in ["tx", "rx"]:
+            for key in ["p1", "p2"]:
                 if (
                     p.ipv6_address == tc[key + "AdvRouteV6"]
                     and p.ipv6_next_hop == tc[key + "NextHopV6"]

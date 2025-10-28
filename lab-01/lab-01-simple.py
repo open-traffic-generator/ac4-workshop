@@ -89,12 +89,12 @@ def traffic_config(api, tc):
         tx_names=[dp1_ip.name], rx_names=[dp2_ip.name]
     )
 
-    fp1_v4_eth, fp1_v4_ip, fp1_v4_udp = fp1_v4.packet.ethernet().ipv4().tcp()
+    fp1_v4_eth, fp1_v4_ip, fp1_v4_tcp = fp1_v4.packet.ethernet().ipv4().tcp()
     fp1_v4_eth.src.value = dp1_eth.mac
     fp1_v4_ip.src.value = tc["p1Ip"]
     fp1_v4_ip.dst.value = tc["p2Ip"]
-    fp1_v4_udp.src_port.value = 5000
-    fp1_v4_udp.dst_port.value = 6000
+    fp1_v4_tcp.src_port.value = 5000
+    fp1_v4_tcp.dst_port.value = 6000
 
     fp2_v4 = c.flows[1]
     fp2_v4.name = "fp2_v4"
@@ -102,15 +102,15 @@ def traffic_config(api, tc):
         tx_names=[dp2_ip.name], rx_names=[dp1_ip.name]
     )
 
-    # fp2_v4_eth, fp2_v4_ip, fp2_v4_udp = fp2_v4.packet.ethernet().ipv4().tcp()
-    # fp2_v4_eth.src.value = dp2_eth.mac
-    # fp2_v4_ip.src.value = tc["p2Ip"]
-    # fp2_v4_ip.dst.value = tc["p1Ip"]
-    # fp2_v4_udp.src_port.value = 5000
-    # fp2_v4_udp.dst_port.value = 6000
+    fp2_v4_eth, fp2_v4_ip, fp2_v4_tcp = fp2_v4.packet.ethernet().ipv4().tcp()
+    fp2_v4_eth.src.value = dp2_eth.mac
+    fp2_v4_ip.src.value = tc["p2Ip"]
+    fp2_v4_ip.dst.value = tc["p1Ip"]
+    fp2_v4_tcp.src_port.value = 5000
+    fp2_v4_tcp.dst_port.value = 6000
     
-    # fp2_v4_udp.src_port.value = 5000
-    # fp2_v4_udp.dst_port.value = 6000
+    fp2_v4_tcp.src_port.value = 5000
+    fp2_v4_tcp.dst_port.value = 6000
 
     # print("Config:\n%s", c)
     return c
