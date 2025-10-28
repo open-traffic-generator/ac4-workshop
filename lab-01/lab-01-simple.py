@@ -10,13 +10,13 @@ def Test_traffic():
         "pktCount": 100000,
         "pktSize": 128,
         "trafficDuration": 20,
-        "p1Mac": "00:00:01:01:01:01",
-        "p1Ip": "10.1.1.1",
-        "p1Gateway": "10.1.1.100",
+        "p1Mac": "0a:ff:d8:c7:9d:0b",
+        "p1Ip": "10.0.2.22",
+        "p1Gateway": "10.0.2.1",
         "p1Prefix": 24,
-        "p2Mac": "00:00:01:01:01:02",
-        "p2Ip": "10.1.1.100",
-        "p2Gateway": "10.1.1.1",
+        "p2Mac": "0a:ff:c7:75:c5:bf",
+        "p2Ip": "10.0.2.12",
+        "p2Gateway": "10.0.2.1",
         "p2Prefix": 24,
     }
 
@@ -43,8 +43,8 @@ def Test_traffic():
 def traffic_config(api, tc):
 
     c = api.config()
-    p1 = c.ports.add(name="p1", location="localhost:5551+localhost:50071")
-    p2 = c.ports.add(name="p2", location="10.24.50.227:5551+10.24.50.227:50071")
+    p1 = c.ports.add(name="p1", location="10.0.10.12:5551+10.0.10.12:50071")
+    p2 = c.ports.add(name="p2", location="10.0.10.11:5551+10.0.10.11:50071")
     
     # capture configuration
 
@@ -89,11 +89,10 @@ def traffic_config(api, tc):
         tx_names=[dp1_ip.name], rx_names=[dp2_ip.name]
     )
 
-    fp1_v4_eth, fp1_v4_ip, fp1_v4_udp = fp1_v4.packet.ethernet().ipv4().udp()
+    fp1_v4_eth, fp1_v4_ip, fp1_v4_udp = fp1_v4.packet.ethernet().ipv4().tcp()
     fp1_v4_eth.src.value = dp1_eth.mac
     fp1_v4_ip.src.value = tc["p1Ip"]
     fp1_v4_ip.dst.value = tc["p2Ip"]
-    fp1_v4_ip.dst
     fp1_v4_udp.src_port.value = 5000
     fp1_v4_udp.dst_port.value = 6000
 
@@ -103,12 +102,15 @@ def traffic_config(api, tc):
         tx_names=[dp2_ip.name], rx_names=[dp1_ip.name]
     )
 
-    fp2_v4_eth, fp2_v4_ip, fp2_v4_udp = fp2_v4.packet.ethernet().ipv4().udp()
-    fp2_v4_eth.src.value = dp2_eth.mac
-    fp2_v4_ip.src.value = tc["p2Ip"]
-    fp2_v4_ip.dst.value = tc["p1Ip"]
-    fp2_v4_udp.src_port.value = 5000
-    fp2_v4_udp.dst_port.value = 6000
+    # fp2_v4_eth, fp2_v4_ip, fp2_v4_udp = fp2_v4.packet.ethernet().ipv4().tcp()
+    # fp2_v4_eth.src.value = dp2_eth.mac
+    # fp2_v4_ip.src.value = tc["p2Ip"]
+    # fp2_v4_ip.dst.value = tc["p1Ip"]
+    # fp2_v4_udp.src_port.value = 5000
+    # fp2_v4_udp.dst_port.value = 6000
+    
+    # fp2_v4_udp.src_port.value = 5000
+    # fp2_v4_udp.dst_port.value = 6000
 
     # print("Config:\n%s", c)
     return c
