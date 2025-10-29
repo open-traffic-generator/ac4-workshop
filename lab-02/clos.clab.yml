@@ -11,7 +11,7 @@ topology:
 
   kinds:
     arista_ceos:
-      image: ceos:4.32.2F
+      image: ceos:4.35.0
 
   nodes:
     ### SPINES ###
