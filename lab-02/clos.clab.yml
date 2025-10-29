@@ -1,8 +1,8 @@
-name: clos
+name: lab-02
 prefix: ""
 
 mgmt:
-  network: clos-nt
+  network: lab-02-nt
   ipv4-subnet: 172.80.80.0/24
 
 topology:

@@ -8,7 +8,7 @@ def Test_traffic():
     test_const = {
         "lineRatePercentage": 1,
         "mbpsRate": 1,
-        "trafficDuration": 300,
+        "trafficDuration": 60,
         "pktSize": 1500,
         "1Mac": "00:00:01:01:01:01",
         "1Ip": "193.168.11.2",

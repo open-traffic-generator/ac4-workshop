@@ -12,11 +12,11 @@ def Test_traffic():
         "trafficDuration": 20,
         "p1Mac": "0a:ff:d8:c7:9d:0b",
         "p1Ip": "10.0.2.22",
-        "p1Gateway": "10.0.2.1",
+        "p1Gateway": "10.0.2.12",
         "p1Prefix": 24,
         "p2Mac": "0a:ff:c7:75:c5:bf",
         "p2Ip": "10.0.2.12",
-        "p2Gateway": "10.0.2.1",
+        "p2Gateway": "10.0.2.22",
         "p2Prefix": 24,
     }
 
@@ -43,8 +43,10 @@ def Test_traffic():
 def traffic_config(api, tc):
 
     c = api.config()
-    p1 = c.ports.add(name="p1", location="10.0.10.12:5551+10.0.10.12:50071")
-    p2 = c.ports.add(name="p2", location="10.0.10.11:5551+10.0.10.11:50071")
+    # p1 = c.ports.add(name="p1", location="10.0.10.12:5551+10.0.10.12:50071")
+    # p2 = c.ports.add(name="p2", location="10.0.10.11:5551+10.0.10.11:50071")
+    p1 = c.ports.add(name="p1", location="localhost:5551+localhost:50071")
+    p2 = c.ports.add(name="p2", location="10.24.50.227:5551+10.24.50.227:50071")
     
     # capture configuration
 
