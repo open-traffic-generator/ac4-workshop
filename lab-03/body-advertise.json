@@ -1,0 +1,10 @@
+{
+  "choice": "protocol",
+  "protocol": {
+    "choice": "route",
+    "route": {
+      "names": ["d2_bgpv4_peer_rrv4"],
+      "state": "advertise"
+    }
+  }
+}

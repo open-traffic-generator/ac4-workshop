@@ -1,0 +1,65 @@
+name: lab-03
+topology:
+  nodes:
+    controller:
+      kind: linux
+      image: ghcr.io/open-traffic-generator/keng-controller:1.40.0-15
+      cmd: --accept-eula --http-port 8443
+      ports:
+        - 8445:8443
+    te1:
+      kind: linux
+      image: ghcr.io/open-traffic-generator/ixia-c-traffic-engine:1.8.0.245
+      env:
+        OPT_LISTEN_PORT: 5551
+        ARG_IFACE_LIST: virtual@af_packet,eth1
+        OPT_NO_HUGEPAGES: Yes
+        OPT_NO_PINNING: Yes
+        WAIT_FOR_IFACE: Yes
+    te2:
+      kind: linux
+      image: ghcr.io/open-traffic-generator/ixia-c-traffic-engine:1.8.0.245
+      env:
+        OPT_LISTEN_PORT: 5551
+        ARG_IFACE_LIST: virtual@af_packet,eth2
+        OPT_NO_HUGEPAGES: Yes
+        OPT_NO_PINNING: Yes
+        WAIT_FOR_IFACE: Yes
+    te3:
+      kind: linux
+      image: ghcr.io/open-traffic-generator/ixia-c-traffic-engine:1.8.0.245
+      env:
+        OPT_LISTEN_PORT: 5551
+        ARG_IFACE_LIST: virtual@af_packet,eth3
+        OPT_NO_HUGEPAGES: Yes
+        OPT_NO_PINNING: Yes
+        WAIT_FOR_IFACE: Yes
+    pe1:
+      kind: linux
+      image: ghcr.io/open-traffic-generator/ixia-c-protocol-engine:1.00.0.482
+      network-mode: container:te1
+      startup-delay: 5
+      env:
+        INTF_LIST: eth1
+    pe2:
+      kind: linux
+      image: ghcr.io/open-traffic-generator/ixia-c-protocol-engine:1.00.0.482
+      network-mode: container:te2
+      startup-delay: 5
+      env:
+        INTF_LIST: eth2
+    pe3:
+      kind: linux
+      image: ghcr.io/open-traffic-generator/ixia-c-protocol-engine:1.00.0.482
+      network-mode: container:te3
+      startup-delay: 5
+      env:
+        INTF_LIST: eth3
+    ceos:
+      kind: arista_ceos
+      image: ceos:4.35.0
+      startup-config: lab-03-ceos.cfg
+  links:
+    - endpoints: ["te1:eth1","ceos:eth1"]
+    - endpoints: ["te2:eth2","ceos:eth2"]
+    - endpoints: ["te3:eth3","ceos:eth3"]
