@@ -25,3 +25,6 @@ controllers:
     spec:
       operator: ixiatg-operator.yaml
       configMap: ixiatg-configmap.yaml
+  - kind: CEOSLab
+    spec:
+      operator: ../../kne-0.3.0/manifests/controllers/ceoslab/manifest.yaml
