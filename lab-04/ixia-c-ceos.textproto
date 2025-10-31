@@ -8,7 +8,7 @@ nodes: {
     os: "eos"
     config: {
         image: "ceos:4.35.0"
-        file: "config.cfg"
+        file: "ceos-config.cfg"
         config_path: "/mnt/flash"
         config_file: "startup-config"
         cert: {

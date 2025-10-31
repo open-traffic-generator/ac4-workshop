@@ -2,7 +2,8 @@ package main
 
 import (
 	"fmt"
-	"log"
+	"net"
+	"slices"
 	"testing"
 	"time"
 
@@ -13,33 +14,26 @@ import (
 func TestEbgpRoutePrefix(t *testing.T) {
 
 	testConst := map[string]interface{}{
-		"controller_location": "https://172.18.0.63:8443",
-		// "controller_location": "172.18.0.62:40051",
+		"controller_location": "https://172.18.0.50:8443",
+		// "controller_location": "172.18.0.52:40051",
 		"p1_location":  "eth1",
 		"p2_location":  "eth2",
 		"pktRate":      uint64(200),
 		"pktCount":     uint32(12000),
 		"pktSize":      uint32(128),
-		"txMac":        "00:00:01:01:01:01",
-		"txIp":         "1.1.1.1",
-		"txGateway":    "1.1.1.2",
-		"txPrefix":     uint32(24),
-		"txAs":         uint32(1111),
-		"rxMac":        "00:00:01:01:01:02",
-		"rxIp":         "1.1.1.2",
-		"rxGateway":    "1.1.1.1",
-		"rxPrefix":     uint32(24),
-		"rxAs":         uint32(1112),
-		"txRouteCount": uint32(1),
-		"rxRouteCount": uint32(1),
-		"txNextHopV4":  "1.1.1.3",
-		"txNextHopV6":  "::1:1:1:3",
-		"rxNextHopV4":  "1.1.1.4",
-		"rxNextHopV6":  "::1:1:1:4",
-		"txAdvRouteV4": "10.10.10.1",
-		"rxAdvRouteV4": "20.20.20.1",
-		"txAdvRouteV6": "::10:10:10:1",
-		"rxAdvRouteV6": "::20:20:20:1",
+		"p1Mac":        "00:00:01:01:01:01",
+		"p1Ip":         "192.168.11.2",
+		"p1Gateway":    "192.168.11.1",
+		"p1Prefix":     uint32(24),
+		"p1As":         uint32(1111),
+		"p2Mac":        "00:00:01:01:01:02",
+		"p2Ip":         "192.168.22.2",
+		"p2Gateway":    "192.168.22.1",
+		"p2Prefix":     uint32(24),
+		"p2As":         uint32(1112),
+		"routeCount":   uint32(3),
+		"p1AdvRouteV4": "101.1.1.1",
+		"p2AdvRouteV4": "201.2.2.1",
 	}
 
 	api := gosnappi.NewApi()
@@ -83,199 +77,127 @@ func ebgpRoutePrefixConfig(tc map[string]interface{}) gosnappi.Config {
 
 	c := gosnappi.NewConfig()
 
-	ptx := c.Ports().Add().SetName("ptx").SetLocation(tc["p1_location"].(string))
-	prx := c.Ports().Add().SetName("prx").SetLocation(tc["p2_location"].(string))
+	p1 := c.Ports().Add().SetName("p1").SetLocation(tc["p1_location"].(string))
+	p2 := c.Ports().Add().SetName("p2").SetLocation(tc["p2_location"].(string))
 
-	dtx := c.Devices().Add().SetName("dtx")
-	drx := c.Devices().Add().SetName("drx")
+	dp1 := c.Devices().Add().SetName("dp1")
+	dp2 := c.Devices().Add().SetName("dp2")
 
-	dtxEth := dtx.Ethernets().
+	dp1Eth := dp1.Ethernets().
 		Add().
-		SetName("dtxEth").
-		SetMac(tc["txMac"].(string)).
+		SetName("dp1Eth").
+		SetMac(tc["p1Mac"].(string)).
 		SetMtu(1500)
 
-	dtxEth.Connection().SetPortName(ptx.Name())
+	dp1Eth.Connection().SetPortName(p1.Name())
 
-	dtxIp := dtxEth.
+	dp1Ip := dp1Eth.
 		Ipv4Addresses().
 		Add().
-		SetName("dtxIp").
-		SetAddress(tc["txIp"].(string)).
-		SetGateway(tc["txGateway"].(string)).
-		SetPrefix(tc["txPrefix"].(uint32))
+		SetName("dp1Ip").
+		SetAddress(tc["p1Ip"].(string)).
+		SetGateway(tc["p1Gateway"].(string)).
+		SetPrefix(tc["p1Prefix"].(uint32))
 
-	dtxBgp := dtx.Bgp().
-		SetRouterId(tc["txIp"].(string))
+	dp1Bgp := dp1.Bgp().
+		SetRouterId(tc["p1Ip"].(string))
 
-	dtxBgpv4 := dtxBgp.
+	dp1Bgpv4 := dp1Bgp.
 		Ipv4Interfaces().Add().
-		SetIpv4Name(dtxIp.Name())
+		SetIpv4Name(dp1Ip.Name())
 
-	dtxBgpv4Peer := dtxBgpv4.
+	dp1Bgpv4Peer := dp1Bgpv4.
 		Peers().
 		Add().
-		SetAsNumber(tc["txAs"].(uint32)).
+		SetAsNumber(tc["p1As"].(uint32)).
 		SetAsType(gosnappi.BgpV4PeerAsType.EBGP).
-		SetPeerAddress(tc["txGateway"].(string)).
-		SetName("dtxBgpv4Peer")
+		SetPeerAddress(tc["p1Gateway"].(string)).
+		SetName("dp1Bgpv4Peer")
 
-	dtxBgpv4Peer.LearnedInformationFilter().SetUnicastIpv4Prefix(true).SetUnicastIpv6Prefix(true)
+	dp1Bgpv4Peer.LearnedInformationFilter().SetUnicastIpv4Prefix(true).SetUnicastIpv6Prefix(true)
 
-	dtxBgpv4PeerRrV4 := dtxBgpv4Peer.
-		V4Routes().
-		Add().
-		SetNextHopIpv4Address(tc["txNextHopV4"].(string)).
-		SetName("dtxBgpv4PeerRrV4").
-		SetNextHopAddressType(gosnappi.BgpV4RouteRangeNextHopAddressType.IPV4).
-		SetNextHopMode(gosnappi.BgpV4RouteRangeNextHopMode.MANUAL)
+	dp1Bgpv4PeerRrV4 := dp1Bgpv4Peer.V4Routes().Add().SetName("dp1Bgpv4PeerRrV4")
 
-	dtxBgpv4PeerRrV4.Addresses().Add().
-		SetAddress(tc["txAdvRouteV4"].(string)).
+	dp1Bgpv4PeerRrV4.Addresses().Add().
+		SetAddress(tc["p1AdvRouteV4"].(string)).
 		SetPrefix(32).
-		SetCount(tc["txRouteCount"].(uint32)).
+		SetCount(tc["routeCount"].(uint32)).
 		SetStep(1)
 
-	dtxBgpv4PeerRrV4.Advanced().
+	dp1Bgpv4PeerRrV4.Advanced().
 		SetMultiExitDiscriminator(50).
 		SetOrigin(gosnappi.BgpRouteAdvancedOrigin.EGP)
 
-	dtxBgpv4PeerRrV4.Communities().Add().
+	dp1Bgpv4PeerRrV4.Communities().Add().
 		SetAsNumber(1).
 		SetAsCustom(2).
 		SetType(gosnappi.BgpCommunityType.MANUAL_AS_NUMBER)
 
-	dtxBgpv4PeerRrV4AsPath := dtxBgpv4PeerRrV4.AsPath().
+	dp1Bgpv4PeerRrV4AsPath := dp1Bgpv4PeerRrV4.AsPath().
 		SetAsSetMode(gosnappi.BgpAsPathAsSetMode.INCLUDE_AS_SET)
 
-	dtxBgpv4PeerRrV4AsPath.Segments().Add().
+	dp1Bgpv4PeerRrV4AsPath.Segments().Add().
 		SetAsNumbers([]uint32{1112, 1113}).
 		SetType(gosnappi.BgpAsPathSegmentType.AS_SEQ)
 
-	dtxBgpv4PeerRrV6 := dtxBgpv4Peer.
-		V6Routes().
+	dp2Eth := dp2.Ethernets().
 		Add().
-		SetNextHopIpv6Address(tc["txNextHopV6"].(string)).
-		SetName("dtxBgpv4PeerRrV6").
-		SetNextHopAddressType(gosnappi.BgpV6RouteRangeNextHopAddressType.IPV6).
-		SetNextHopMode(gosnappi.BgpV6RouteRangeNextHopMode.MANUAL)
-
-	dtxBgpv4PeerRrV6.Addresses().Add().
-		SetAddress(tc["txAdvRouteV6"].(string)).
-		SetPrefix(128).
-		SetCount(tc["txRouteCount"].(uint32)).
-		SetStep(1)
-
-	dtxBgpv4PeerRrV6.Advanced().
-		SetMultiExitDiscriminator(50).
-		SetOrigin(gosnappi.BgpRouteAdvancedOrigin.EGP)
-
-	dtxBgpv4PeerRrV6.Communities().Add().
-		SetAsNumber(1).
-		SetAsCustom(2).
-		SetType(gosnappi.BgpCommunityType.MANUAL_AS_NUMBER)
-
-	dtxBgpv4PeerRrV6AsPath := dtxBgpv4PeerRrV6.AsPath().
-		SetAsSetMode(gosnappi.BgpAsPathAsSetMode.INCLUDE_AS_SET)
-
-	dtxBgpv4PeerRrV6AsPath.Segments().Add().
-		SetAsNumbers([]uint32{1112, 1113}).
-		SetType(gosnappi.BgpAsPathSegmentType.AS_SEQ)
-
-	drxEth := drx.Ethernets().
-		Add().
-		SetName("drxEth").
-		SetMac(tc["rxMac"].(string)).
+		SetName("dp2Eth").
+		SetMac(tc["p2Mac"].(string)).
 		SetMtu(1500)
 
-	drxEth.Connection().SetPortName(prx.Name())
+	dp2Eth.Connection().SetPortName(p2.Name())
 
-	drxIp := drxEth.
+	dp2Ip := dp2Eth.
 		Ipv4Addresses().
 		Add().
-		SetName("drxIp").
-		SetAddress(tc["rxIp"].(string)).
-		SetGateway(tc["rxGateway"].(string)).
-		SetPrefix(tc["rxPrefix"].(uint32))
+		SetName("dp2Ip").
+		SetAddress(tc["p2Ip"].(string)).
+		SetGateway(tc["p2Gateway"].(string)).
+		SetPrefix(tc["p2Prefix"].(uint32))
 
-	drxBgp := drx.Bgp().
-		SetRouterId(tc["rxIp"].(string))
+	dp2Bgp := dp2.Bgp().
+		SetRouterId(tc["p2Ip"].(string))
 
-	drxBgpv4 := drxBgp.
+	dp2Bgpv4 := dp2Bgp.
 		Ipv4Interfaces().Add().
-		SetIpv4Name(drxIp.Name())
+		SetIpv4Name(dp2Ip.Name())
 
-	drxBgpv4Peer := drxBgpv4.
+	dp2Bgpv4Peer := dp2Bgpv4.
 		Peers().
 		Add().
-		SetAsNumber(tc["rxAs"].(uint32)).
+		SetAsNumber(tc["p2As"].(uint32)).
 		SetAsType(gosnappi.BgpV4PeerAsType.EBGP).
-		SetPeerAddress(tc["rxGateway"].(string)).
-		SetName("drxBgpv4Peer")
+		SetPeerAddress(tc["p2Gateway"].(string)).
+		SetName("dp2Bgpv4Peer")
 
-	drxBgpv4Peer.LearnedInformationFilter().SetUnicastIpv4Prefix(true).SetUnicastIpv6Prefix(true)
+	dp2Bgpv4Peer.LearnedInformationFilter().SetUnicastIpv4Prefix(true).SetUnicastIpv6Prefix(false)
 
-	drxBgpv4PeerRrV4 := drxBgpv4Peer.
-		V4Routes().
-		Add().
-		SetNextHopIpv4Address(tc["rxNextHopV4"].(string)).
-		SetName("drxBgpv4PeerRrV4").
-		SetNextHopAddressType(gosnappi.BgpV4RouteRangeNextHopAddressType.IPV4).
-		SetNextHopMode(gosnappi.BgpV4RouteRangeNextHopMode.MANUAL)
+	dp2Bgpv4PeerRrV4 := dp2Bgpv4Peer.V4Routes().Add().SetName("dp2Bgpv4PeerRrV4")
 
-	drxBgpv4PeerRrV4.Addresses().Add().
-		SetAddress(tc["rxAdvRouteV4"].(string)).
+	dp2Bgpv4PeerRrV4.Addresses().Add().
+		SetAddress(tc["p2AdvRouteV4"].(string)).
 		SetPrefix(32).
-		SetCount(tc["rxRouteCount"].(uint32)).
+		SetCount(tc["routeCount"].(uint32)).
 		SetStep(1)
 
-	drxBgpv4PeerRrV4.Advanced().
+	dp2Bgpv4PeerRrV4.Advanced().
 		SetMultiExitDiscriminator(50).
 		SetOrigin(gosnappi.BgpRouteAdvancedOrigin.EGP)
 
-	drxBgpv4PeerRrV4.Communities().Add().
+	dp2Bgpv4PeerRrV4.Communities().Add().
 		SetAsNumber(1).
 		SetAsCustom(2).
 		SetType(gosnappi.BgpCommunityType.MANUAL_AS_NUMBER)
 
-	drxBgpv4PeerRrV4AsPath := drxBgpv4PeerRrV4.AsPath().
+	dp2Bgpv4PeerRrV4AsPath := dp2Bgpv4PeerRrV4.AsPath().
 		SetAsSetMode(gosnappi.BgpAsPathAsSetMode.INCLUDE_AS_SET)
 
-	drxBgpv4PeerRrV4AsPath.Segments().Add().
+	dp2Bgpv4PeerRrV4AsPath.Segments().Add().
 		SetAsNumbers([]uint32{4444}).
 		SetType(gosnappi.BgpAsPathSegmentType.AS_SEQ)
 
-	drxBgpv4PeerRrV6 := drxBgpv4Peer.
-		V6Routes().
-		Add().
-		SetNextHopIpv6Address(tc["rxNextHopV6"].(string)).
-		SetName("drxBgpv4PeerRrV6").
-		SetNextHopAddressType(gosnappi.BgpV6RouteRangeNextHopAddressType.IPV6).
-		SetNextHopMode(gosnappi.BgpV6RouteRangeNextHopMode.MANUAL)
-
-	drxBgpv4PeerRrV6.Addresses().Add().
-		SetAddress(tc["rxAdvRouteV6"].(string)).
-		SetPrefix(128).
-		SetCount(tc["rxRouteCount"].(uint32)).
-		SetStep(1)
-
-	drxBgpv4PeerRrV6.Advanced().
-		SetMultiExitDiscriminator(50).
-		SetOrigin(gosnappi.BgpRouteAdvancedOrigin.EGP)
-
-	drxBgpv4PeerRrV6.Communities().Add().
-		SetAsNumber(1).
-		SetAsCustom(2).
-		SetType(gosnappi.BgpCommunityType.MANUAL_AS_NUMBER)
-
-	drxBgpv4PeerRrV6AsPath := drxBgpv4PeerRrV6.AsPath().
-		SetAsSetMode(gosnappi.BgpAsPathAsSetMode.INCLUDE_AS_SET)
-
-	drxBgpv4PeerRrV6AsPath.Segments().Add().
-		SetAsNumbers([]uint32{4444}).
-		SetType(gosnappi.BgpAsPathSegmentType.AS_SEQ)
-
-	for i := 1; i <= 4; i++ {
+	for i := 1; i <= 2; i++ {
 		flow := c.Flows().Add()
 		flow.Duration().FixedPackets().SetPackets(tc["pktCount"].(uint32))
 		flow.Rate().SetPps(tc["pktRate"].(uint64))
@@ -283,73 +205,39 @@ func ebgpRoutePrefixConfig(tc map[string]interface{}) gosnappi.Config {
 		flow.Metrics().SetEnable(true)
 	}
 
-	ftxV4 := c.Flows().Items()[0]
-	ftxV4.SetName("ftxV4")
-	ftxV4.TxRx().Device().
-		SetTxNames([]string{dtxBgpv4PeerRrV4.Name()}).
-		SetRxNames([]string{drxBgpv4PeerRrV4.Name()})
+	fp1V4 := c.Flows().Items()[0]
+	fp1V4.SetName("fp1V4")
+	fp1V4.TxRx().Device().
+		SetTxNames([]string{dp1Bgpv4PeerRrV4.Name()}).
+		SetRxNames([]string{dp2Bgpv4PeerRrV4.Name()})
 
-	ftxV4Eth := ftxV4.Packet().Add().Ethernet()
-	ftxV4Eth.Src().SetValue(dtxEth.Mac())
+	fp1V4Eth := fp1V4.Packet().Add().Ethernet()
+	fp1V4Eth.Src().SetValue(dp1Eth.Mac())
 
-	ftxV4Ip := ftxV4.Packet().Add().Ipv4()
-	ftxV4Ip.Src().SetValue(tc["txAdvRouteV4"].(string))
-	ftxV4Ip.Dst().SetValue(tc["rxAdvRouteV4"].(string))
+	fp1V4Ip := fp1V4.Packet().Add().Ipv4()
+	fp1V4Ip.Src().SetValue(tc["p1AdvRouteV4"].(string))
+	fp1V4Ip.Dst().SetValue(tc["p2AdvRouteV4"].(string))
 
-	ftxV4Udp := ftxV4.Packet().Add().Udp()
-	ftxV4Udp.SrcPort().SetValue(5000)
-	ftxV4Udp.DstPort().SetValue(6000)
+	fp1V4Udp := fp1V4.Packet().Add().Udp()
+	fp1V4Udp.SrcPort().SetValue(5000)
+	fp1V4Udp.DstPort().SetValue(6000)
 
-	ftxV6 := c.Flows().Items()[1]
-	ftxV6.SetName("ftxV6")
-	ftxV6.TxRx().Device().
-		SetTxNames([]string{dtxBgpv4PeerRrV6.Name()}).
-		SetRxNames([]string{drxBgpv4PeerRrV6.Name()})
+	fp2V4 := c.Flows().Items()[1]
+	fp2V4.SetName("fp2V4")
+	fp2V4.TxRx().Device().
+		SetTxNames([]string{dp2Bgpv4PeerRrV4.Name()}).
+		SetRxNames([]string{dp1Bgpv4PeerRrV4.Name()})
 
-	ftxV6Eth := ftxV6.Packet().Add().Ethernet()
-	ftxV6Eth.Src().SetValue(dtxEth.Mac())
+	fp2V4Eth := fp2V4.Packet().Add().Ethernet()
+	fp2V4Eth.Src().SetValue(dp2Eth.Mac())
 
-	ftxV6Ip := ftxV6.Packet().Add().Ipv6()
-	ftxV6Ip.Src().SetValue(tc["txAdvRouteV6"].(string))
-	ftxV6Ip.Dst().SetValue(tc["rxAdvRouteV6"].(string))
+	fp2V4Ip := fp2V4.Packet().Add().Ipv4()
+	fp2V4Ip.Src().SetValue(tc["p2AdvRouteV4"].(string))
+	fp2V4Ip.Dst().SetValue(tc["p1AdvRouteV4"].(string))
 
-	ftxV6Udp := ftxV6.Packet().Add().Udp()
-	ftxV6Udp.SrcPort().SetValue(5000)
-	ftxV6Udp.DstPort().SetValue(6000)
-
-	frxV4 := c.Flows().Items()[2]
-	frxV4.SetName("frxV4")
-	frxV4.TxRx().Device().
-		SetTxNames([]string{drxBgpv4PeerRrV4.Name()}).
-		SetRxNames([]string{dtxBgpv4PeerRrV4.Name()})
-
-	frxV4Eth := frxV4.Packet().Add().Ethernet()
-	frxV4Eth.Src().SetValue(drxEth.Mac())
-
-	frxV4Ip := frxV4.Packet().Add().Ipv4()
-	frxV4Ip.Src().SetValue(tc["rxAdvRouteV4"].(string))
-	frxV4Ip.Dst().SetValue(tc["txAdvRouteV4"].(string))
-
-	frxV4Udp := frxV4.Packet().Add().Udp()
-	frxV4Udp.SrcPort().SetValue(6000)
-	frxV4Udp.DstPort().SetValue(5000)
-
-	frxV6 := c.Flows().Items()[3]
-	frxV6.SetName("frxV6")
-	frxV6.TxRx().Device().
-		SetTxNames([]string{drxBgpv4PeerRrV6.Name()}).
-		SetRxNames([]string{dtxBgpv4PeerRrV6.Name()})
-
-	frxV6Eth := frxV6.Packet().Add().Ethernet()
-	frxV6Eth.Src().SetValue(drxEth.Mac())
-
-	frxV6Ip := frxV6.Packet().Add().Ipv6()
-	frxV6Ip.Src().SetValue(tc["rxAdvRouteV6"].(string))
-	frxV6Ip.Dst().SetValue(tc["txAdvRouteV6"].(string))
-
-	frxV6Udp := frxV6.Packet().Add().Udp()
-	frxV6Udp.SrcPort().SetValue(6000)
-	frxV6Udp.DstPort().SetValue(5000)
+	fp2V4Udp := fp2V4.Packet().Add().Udp()
+	fp2V4Udp.SrcPort().SetValue(6000)
+	fp2V4Udp.DstPort().SetValue(5000)
 
 	return c
 }
@@ -357,8 +245,8 @@ func ebgpRoutePrefixConfig(tc map[string]interface{}) gosnappi.Config {
 func bgpMetricsOk(t *testing.T, api gosnappi.Api, tc map[string]interface{}) bool {
 	for _, m := range getBgpv4Metrics(t, api) {
 		if m.SessionState() == gosnappi.Bgpv4MetricSessionState.DOWN ||
-			m.RoutesAdvertised() != 2*uint64(tc["txRouteCount"].(uint32)) ||
-			m.RoutesReceived() != 2*uint64(tc["rxRouteCount"].(uint32)) {
+			m.RoutesAdvertised() != uint64(tc["routeCount"].(uint32)) ||
+			m.RoutesReceived() != uint64(tc["routeCount"].(uint32)) {
 			return false
 		}
 	}
@@ -366,24 +254,32 @@ func bgpMetricsOk(t *testing.T, api gosnappi.Api, tc map[string]interface{}) boo
 }
 
 func bgpPrefixesOk(t *testing.T, api gosnappi.Api, tc map[string]interface{}) bool {
+
+	var p1ExpectedRoutesV4 []string
+	var p2ExpectedRoutesV4 []string
+
+	for i := 0; i <= int(tc["routeCount"].(uint32)); i++ {
+		p1ExpectedRoutesV4 = append(p1ExpectedRoutesV4, incrementIPv4(net.ParseIP(tc["p2AdvRouteV4"].(string)), uint32(i)).String())
+		p2ExpectedRoutesV4 = append(p2ExpectedRoutesV4, incrementIPv4(net.ParseIP(tc["p1AdvRouteV4"].(string)), uint32(i)).String())
+	}
+
 	prefixCount := 0
 	for _, m := range getBgpPrefixes(t, api) {
 		for _, p := range m.Ipv4UnicastPrefixes().Items() {
-			for _, key := range []string{"tx", "rx"} {
-				if p.Ipv4Address() == tc[key+"AdvRouteV4"].(string) && p.Ipv4NextHop() == tc[key+"NextHopV4"].(string) {
+			if m.BgpPeerName() == "dp1Bgpv4Peer" {
+				if slices.Contains(p1ExpectedRoutesV4, p.Ipv4Address()) && p.Ipv4NextHop() == tc["p1Gateway"].(string) {
 					prefixCount += 1
 				}
 			}
-		}
-		for _, p := range m.Ipv6UnicastPrefixes().Items() {
-			for _, key := range []string{"tx", "rx"} {
-				if p.Ipv6Address() == tc[key+"AdvRouteV6"].(string) && p.Ipv6NextHop() == tc[key+"NextHopV6"].(string) {
+			if m.BgpPeerName() == "dp2Bgpv4Peer" {
+				if slices.Contains(p2ExpectedRoutesV4, p.Ipv4Address()) && p.Ipv4NextHop() == tc["p2Gateway"].(string) {
 					prefixCount += 1
 				}
 			}
 		}
 	}
-	return prefixCount == 4
+	fmt.Printf("DEBUG: prefixCount=%d\n", prefixCount)
+	return prefixCount == 2*int(tc["routeCount"].(uint32))
 }
 
 func flowMetricsOk(t *testing.T, api gosnappi.Api, tc map[string]interface{}) bool {
@@ -436,6 +332,8 @@ func getFlowMetrics(t *testing.T, api gosnappi.Api) []gosnappi.FlowMetric {
 			"Frames Rx",
 			"FPS Tx",
 			"FPS Rx",
+			"bps Tx",
+			"bps Rx",
 			"Bytes Tx",
 			"Bytes Rx",
 		},
@@ -450,6 +348,8 @@ func getFlowMetrics(t *testing.T, api gosnappi.Api) []gosnappi.FlowMetric {
 				v.FramesRx(),
 				v.FramesTxRate(),
 				v.FramesRxRate(),
+				v.TxRateBps(),
+				v.RxRateBps(),
 				v.BytesTx(),
 				v.BytesRx(),
 			})
@@ -499,7 +399,7 @@ func getBgpPrefixes(t *testing.T, api gosnappi.Api) []gosnappi.BgpPrefixesState 
 	sr := gosnappi.NewStatesRequest()
 	sr.BgpPrefixes()
 	res, _ := api.GetStates(sr)
-	log.Println(res)
+	// log.Println(res)
 
 	tb := table.NewTable(
 		"BGP Prefixes",
@@ -507,10 +407,6 @@ func getBgpPrefixes(t *testing.T, api gosnappi.Api) []gosnappi.BgpPrefixesState 
 			"Name",
 			"IPv4 Address",
 			"IPv4 Next Hop",
-			"IPv6 Address",
-			"IPv6 Next Hop",
-			"MED",
-			"Local Preference",
 		},
 		20,
 	)
@@ -522,53 +418,35 @@ func getBgpPrefixes(t *testing.T, api gosnappi.Api) []gosnappi.BgpPrefixesState 
 				v.BgpPeerName(), fmt.Sprintf("%s/%d", w.Ipv4Address(), w.PrefixLength()), w.Ipv4NextHop(), "",
 			}
 
-			if w.HasIpv6NextHop() {
-				row = append(row, w.Ipv6NextHop())
-			} else {
-				row = append(row, "")
-			}
-
-			if w.HasMultiExitDiscriminator() {
-				row = append(row, w.MultiExitDiscriminator())
-			} else {
-				row = append(row, "")
-			}
-
-			if w.HasLocalPreference() {
-				row = append(row, w.LocalPreference())
-			} else {
-				row = append(row, "")
-			}
-
-			tb.AppendRow(row)
-		}
-		for _, w := range v.Ipv6UnicastPrefixes().Items() {
-			row := []interface{}{v.BgpPeerName(), ""}
-
-			if w.HasIpv4NextHop() {
-				row = append(row, w.Ipv4NextHop())
-			} else {
-				row = append(row, "")
-			}
-			row = append(row, fmt.Sprintf("%s/%d", w.Ipv6Address(), w.PrefixLength()), w.Ipv6NextHop())
-
-			if w.HasMultiExitDiscriminator() {
-				row = append(row, w.MultiExitDiscriminator())
-			} else {
-				row = append(row, "")
-			}
-
-			if w.HasLocalPreference() {
-				row = append(row, w.LocalPreference())
-			} else {
-				row = append(row, "")
-			}
 			tb.AppendRow(row)
 		}
 	}
 
 	t.Log(tb.String())
 	return res.BgpPrefixes().Items()
+}
+
+func incrementIPv4(ip net.IP, amount uint32) net.IP {
+
+	ipInt := ipToUint32(ip)
+	ipInt += amount
+
+	return uint32ToIP(ipInt)
+}
+
+func ipToUint32(ip net.IP) uint32 {
+	ip = ip.To4()
+	return uint32(ip[0])<<24 | uint32(ip[1])<<16 | uint32(ip[2])<<8 | uint32(ip[3])
+}
+
+// uint32ToIP converts a uint32 to a net.IP (IPv4).
+func uint32ToIP(ipInt uint32) net.IP {
+	ip := make(net.IP, 4)
+	ip[0] = byte((ipInt >> 24) & 0xFF)
+	ip[1] = byte((ipInt >> 16) & 0xFF)
+	ip[2] = byte((ipInt >> 8) & 0xFF)
+	ip[3] = byte(ipInt & 0xFF)
+	return ip
 }
 
 func waitFor(t *testing.T, fn func() bool, opts waitForOpts) {

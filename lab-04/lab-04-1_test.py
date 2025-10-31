@@ -7,7 +7,7 @@ import time
 def Test_traffic():
     test_const = {
         "pktRate": 200,
-        "pktCount": 100000,
+        "pktCount": 1000,
         "pktSize": 128,
         "trafficDuration": 20,
         "p1Mac": "0a:ff:d8:c7:9d:0b",
@@ -20,7 +20,7 @@ def Test_traffic():
         "p2Prefix": 24,
     }
 
-    api = snappi.api(location="https://172.18.0.52:8443", verify=False)
+    api = snappi.api(location="https://172.18.0.50:8443", verify=False)
 
     c = traffic_config(api, test_const)
 
