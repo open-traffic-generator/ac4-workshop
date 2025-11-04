@@ -26,8 +26,6 @@ def Test_traffic():
 
     api.set_config(c)
 
-    start_protocols(api)
-
     # start_capture(api)
 
     start_transmit(api)
@@ -58,40 +56,39 @@ def traffic_config(api, tc):
         f = c.flows.add()
         f.duration.fixed_packets.packets = tc["pktCount"]
         f.rate.pps = tc["pktRate"]
-        f.rate.kbps = tc["pktRate"]
         f.size.fixed = tc["pktSize"]
         f.metrics.enable = True
 
-    fp1_v4 = c.flows[0]
-    fp1_v4.name = "fp1_v4"
-    fp1_v4.tx_rx.port.set(
+    fp1 = c.flows[0]
+    fp1.name = "fp1"
+    fp1.tx_rx.port.set(
         tx_name=p1.name, rx_names=[p2.name]
     )
 
-    fp1_v4_eth, fp1_v4_ip, fp1_v4_tcp = fp1_v4.packet.ethernet().ipv4().tcp()
-    fp1_v4_eth.src.value = tc["p1Mac"]
-    fp1_v4_eth.dst.value = "12:bd:b6:a9:0e:83"
-    fp1_v4_ip.src.value = tc["p1Ip"]
-    fp1_v4_ip.dst.value = tc["p2Ip"]
-    fp1_v4_tcp.src_port.value = 5000
-    fp1_v4_tcp.dst_port.value = 6000
+    fp1_eth, fp1_ip, fp1_tcp = fp1.packet.ethernet().ipv4().tcp()
+    fp1_eth.src.value = tc["p1Mac"]
+    fp1_eth.dst.value = "12:bd:b6:a9:0e:83"
+    fp1_ip.src.value = tc["p1Ip"]
+    fp1_ip.dst.value = tc["p2Ip"]
+    fp1_tcp.src_port.value = 5000
+    fp1_tcp.dst_port.value = 6000
 
-    fp2_v4 = c.flows[1]
-    fp2_v4.name = "fp2_v4"
-    fp2_v4.tx_rx.port.set(
+    fp2 = c.flows[1]
+    fp2.name = "fp2"
+    fp2.tx_rx.port.set(
         tx_name=p2.name, rx_names=[p1.name]
     )
 
-    fp2_v4_eth, fp2_v4_ip, fp2_v4_tcp = fp2_v4.packet.ethernet().ipv4().tcp()
-    fp1_v4_eth.src.value = tc["p2Mac"]
-    fp1_v4_eth.dst.value = "12:bd:b6:a9:0e:83"
-    fp2_v4_ip.src.value = tc["p2Ip"]
-    fp2_v4_ip.dst.value = tc["p1Ip"]
-    fp2_v4_tcp.src_port.value = 5000
-    fp2_v4_tcp.dst_port.value = 6000
+    fp2_eth, fp2_ip, fp2_tcp = fp2.packet.ethernet().ipv4().tcp()
+    fp2_eth.src.value = tc["p2Mac"]
+    fp2_eth.dst.value = "12:bd:b6:a9:0e:83"
+    fp2_ip.src.value = tc["p2Ip"]
+    fp2_ip.dst.value = tc["p1Ip"]
+    fp2_tcp.src_port.value = 5000
+    fp2_tcp.dst_port.value = 6000
     
-    fp2_v4_tcp.src_port.value = 5000
-    fp2_v4_tcp.dst_port.value = 6000
+    fp2_tcp.src_port.value = 5000
+    fp2_tcp.dst_port.value = 6000
 
     # print("Config:\n%s", c)
     return c
