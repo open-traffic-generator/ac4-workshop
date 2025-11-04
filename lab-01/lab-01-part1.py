@@ -7,17 +7,9 @@ import time
 def Test_traffic():
     test_const = {
         "pktRate": 200,
-        "pktCount": 100000,
+        "pktCount": 12000,
         "pktSize": 128,
         "trafficDuration": 20,
-        "p1Mac": "12:fe:d0:27:e1:03",
-        "p1Ip": "10.0.2.12",
-        "p1Gateway": "10.0.2.12",
-        "p1Prefix": 24,
-        "p2Mac": "12:7d:f7:11:a6:95",
-        "p2Ip": "10.0.2.12",
-        "p2Gateway": "10.0.2.22",
-        "p2Prefix": 24,
     }
 
     api = snappi.api(location="https://127.0.0.1:8443", verify=False)
@@ -66,10 +58,10 @@ def traffic_config(api, tc):
     )
 
     fp1_eth, fp1_ip, fp1_tcp = fp1.packet.ethernet().ipv4().tcp()
-    fp1_eth.src.value = tc["p1Mac"]
+    fp1_eth.src.value = "12:bd:b6:a9:0e:00"
     fp1_eth.dst.value = "12:bd:b6:a9:0e:83"
-    fp1_ip.src.value = tc["p1Ip"]
-    fp1_ip.dst.value = tc["p2Ip"]
+    fp1_ip.src.value = "10.0.2.12"
+    fp1_ip.dst.value = "10.0.2.22"
     fp1_tcp.src_port.value = 5000
     fp1_tcp.dst_port.value = 6000
 
@@ -80,10 +72,10 @@ def traffic_config(api, tc):
     )
 
     fp2_eth, fp2_ip, fp2_tcp = fp2.packet.ethernet().ipv4().tcp()
-    fp2_eth.src.value = tc["p2Mac"]
+    fp2_eth.src.value = "12:bd:b6:a9:01:01"
     fp2_eth.dst.value = "12:bd:b6:a9:0e:83"
-    fp2_ip.src.value = tc["p2Ip"]
-    fp2_ip.dst.value = tc["p1Ip"]
+    fp2_ip.src.value = "10.0.2.22"
+    fp2_ip.dst.value = "10.0.2.12"
     fp2_tcp.src_port.value = 5000
     fp2_tcp.dst_port.value = 6000
     
