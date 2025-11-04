@@ -26,9 +26,9 @@ git clone https://github.com/open-traffic-generator/ac4-workshop.git
 
 Optionally, you can set this up in your Visual Studio Code. You will need to install the “Remote SSH” and “Remote Explorer” extensions then add your ssh connection using the previously downloaded ssh key. 
 
-![remote](../Docs/images/image-1.png)
+![remote](../Docs/images/lab-01/image-1.png)
 
-![new remote](../Docs/images/image-2.png)
+![new remote](../Docs/images/lab-01/image-2.png)
 
 Example SSH command for Windows:
 
@@ -55,7 +55,7 @@ docker pull ghcr.io/open-traffic-generator/ixia-c-traffic-engine:1.8.0.245
 
 We'll deploy 2 containers on VM1 (KENG tontroller and Ixia-C traffic engine) and one container on VM2 (Ixia-C traffic engine) using ***docker run***
 
-![alt text](../Docs/images/lab1-1.png)
+![alt text](../Docs/images/lab-01/lab1-1.png)
 
 On VM1 deploy the controller. Here we're using the network mode "host" but Ixia-C containers could also be deployed in custom bridge. [Ixia-C deployments examples](https://github.com/open-traffic-generator/ixia-c/tree/main/deployments)
 ```Shell
@@ -92,36 +92,36 @@ docker run --privileged -d                    \
 ```
 On VM1 open **lab-01-part1.py** and set the controller and port location attributes. This is the management IP for each Ixia-c port. Since we're using the controller on VM1, the location of port1 should be 'localhost' but the location of port2 should point to the management IP of VM2 host. This address usually is present in the prompt
 
-![alt text](../Docs/images/lab1-3.png)
+![alt text](../Docs/images/lab-01/lab1-3.png)
 
 
 Since we're running in AWS VPC, promiscuous mode is disabled and the endpoints must match the interface configurations. 
 
 On VM1 run `arp` to find out the MAC address of your gateway (10.0.2.1), then run `ip address` to find out the interface MAC and IPv4
 
-![alt text](../Docs/images/lab1-4.png)
-![alt text](../Docs/images/lab1-5.png)
+![alt text](../Docs/images/lab-01/lab1-4.png)
+![alt text](../Docs/images/lab-01/lab1-5.png)
 
 On VM2 terminal, run `ip address` to retrieve the MAC and IPv4 interface information. The gw address is the same as on VM1
 
-![alt text](../Docs/images/lab1-6.png)
+![alt text](../Docs/images/lab-01/lab1-6.png)
 
 Back on VM1 let's open the script lab-01-part1.py and make these changes. There are 2 flows, one for each transmitting port.
 
-![alt text](../Docs/images/lab1-7.png)
+![alt text](../Docs/images/lab-01/lab1-7.png)
 
 Run the script and observe the results
 
 ```Shell
 python3 lab-01-part1.py
 ```
-![alt text](../Docs/images/lab1-10.png)
+![alt text](../Docs/images/lab-01/lab1-10.png)
 
 Change the script to generate 2 Mbps on each flow and rerun
 
-![alt text](../Docs/images/lab1-8.png)
+![alt text](../Docs/images/lab-01/lab1-8.png)
 
-![alt text](../Docs/images/lab1-9.png)
+![alt text](../Docs/images/lab-01/lab1-9.png)
 
 Stop and remove the containers for part1 of this lab
 
@@ -134,12 +134,12 @@ docker stop $(docker ps -aq) && docker rm $(docker ps -aq)
 
 This time we're adding the Ixia-C Protocol Engine component. This will ensure that ARP is resolved and the destination MAC address is automatically populated. As you can see in the diagram below we need to deploy 3 containers on each VM but we will only use one controller (VM1 Keng controller)
 
-![alt text](../Docs/images/lab1-2.png)
+![alt text](../Docs/images/lab-01/lab1-2.png)
 
 The configuration will include devices which will be used as endpoints for traffic.
 Open **compose.yml** file and notice the 3 containers. We're binding the traffic engine to **ens6** and the Ixia-C Protocol Engine is using the Ixia-C Traffic Engine network setting. 
 
-![alt text](../Docs/images/lab1-11.png)
+![alt text](../Docs/images/lab-01/lab1-11.png)
 
 On both terminals run **docker compose** to deploy the containers
 
@@ -157,7 +157,49 @@ docker logs lab-01-traffic_engine-1
 
 Check the ***Interface ens6 found*** log
 
-![alt text](../Docs/images/lab1-12.png)
+![alt text](../Docs/images/lab-01/lab1-12.png)
 
 Let's open the script **lab-01-part2.py** and make the changes to match the interface information: management IP, test IP and MAC address. You can use `arp` and `ip address` commands to retrieve that.
-Now the information is part of the test constants array.
+Now the information is part of the test constants array. 
+
+![alt text](../Docs/images/lab-01/lab1-13.png)
+
+Notice now the flow configuration has no destination mac address set. That is because we're using flow tx_rx parameter set to ***device*** which will populate the destination mac address upon completion of the ARP request
+
+![alt text](../Docs/images/lab-01/lab1-16.png)
+
+Run the test and observe stats.
+
+![alt text](../Docs/images/lab-01/lab1-18.png)
+
+Enable capture in the script by uncommenting the capture specific steps then run the test.
+Set the ***pktCount*** to 200 and run the test
+
+![alt text](../Docs/images/lab-01/lab1-14.png)
+
+At the end you will see 2 files containing the captured packets. With keng we can only capture incoming packets.
+
+![alt text](../Docs/images/lab-01/lab1-15.png)
+
+Let's run some manual curl commands for retrieving the port stats, flow stats and ARP table.
+
+```Shell
+curl -k -X POST https://127.0.0.1:8443/monitor/metrics -d '{"choice":"port"}'
+curl -k -X POST https://127.0.0.1:8443/monitor/metrics -d '{"choice":"flow"}'
+curl -k -X POST https://127.0.0.1:8443/monitor/states -d '{"choice":"ipv4_neighbors"}'
+```
+As you can see in the port metrics, we're receiving more frames on P1 than what P2 is sending. This is filtered correctly by Keng as see in the flow metrics.
+
+![alt text](../Docs/images/lab-01/lab1-17.png)
+
+See the entire controller configuration in json format
+
+```Shell
+curl -k https://127.0.0.1:8443/config
+```
+
+Clear the containers on both VMs
+
+```Shell
+cd ~/ac4-workshop/lab-01/ && docker compose down
+```

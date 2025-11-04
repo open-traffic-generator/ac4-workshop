@@ -74,7 +74,6 @@ def traffic_config(api, tc):
         f = c.flows.add()
         f.duration.fixed_packets.packets = tc["pktCount"]
         f.rate.pps = tc["pktRate"]
-        f.rate.kbps = tc["pktRate"]
         f.size.fixed = tc["pktSize"]
         f.metrics.enable = True
 
