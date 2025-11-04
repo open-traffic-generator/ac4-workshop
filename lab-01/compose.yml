@@ -11,7 +11,7 @@ services:
     network_mode: "host"
     environment:
       - OPT_LISTEN_PORT=5551
-      - ARG_IFACE_LIST=virtual@af_packet,ens192
+      - ARG_IFACE_LIST=virtual@af_packet,ens6
       - OPT_NO_HUGEPAGES=Yes
       - OPT_NO_PINNING=Yes
       - WAIT_FOR_IFACE=Yes
@@ -21,4 +21,4 @@ services:
     privileged: true
     network_mode: service:traffic_engine_1
     environment:
-      - INTF_LIST=ens192
+      - INTF_LIST=ens6

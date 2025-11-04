@@ -10,11 +10,11 @@ def Test_traffic():
         "pktCount": 100000,
         "pktSize": 128,
         "trafficDuration": 20,
-        "p1Mac": "0a:ff:d8:c7:9d:0b",
-        "p1Ip": "10.0.2.22",
+        "p1Mac": "12:fe:d0:27:e1:03",
+        "p1Ip": "10.0.2.12",
         "p1Gateway": "10.0.2.12",
         "p1Prefix": 24,
-        "p2Mac": "0a:ff:c7:75:c5:bf",
+        "p2Mac": "12:7d:f7:11:a6:95",
         "p2Ip": "10.0.2.12",
         "p2Gateway": "10.0.2.22",
         "p2Prefix": 24,
@@ -43,10 +43,8 @@ def Test_traffic():
 def traffic_config(api, tc):
 
     c = api.config()
-    # p1 = c.ports.add(name="p1", location="10.0.10.12:5551+10.0.10.12:50071")
-    # p2 = c.ports.add(name="p2", location="10.0.10.11:5551+10.0.10.11:50071")
-    p1 = c.ports.add(name="p1", location="localhost:5551+localhost:50071")
-    p2 = c.ports.add(name="p2", location="10.24.50.227:5551+10.24.50.227:50071")
+    p1 = c.ports.add(name="p1", location="localhost:5551")
+    p2 = c.ports.add(name="p2", location="10.0.10.12:5551")
     
     # capture configuration
 
@@ -55,27 +53,6 @@ def traffic_config(api, tc):
     
     p1_capture = c.captures.add(name="p1_capture")
     p1_capture.set(port_names=["p1"],format="pcap",overwrite=True)
-
-    dp1 = c.devices.add(name="dp1")
-    dp2 = c.devices.add(name="dp2")
-
-    dp1_eth = dp1.ethernets.add(name="dp1_eth")
-    dp1_eth.connection.port_name = p1.name
-    dp1_eth.mac = tc["p1Mac"]
-    dp1_eth.mtu = 1500
-
-    dp1_ip = dp1_eth.ipv4_addresses.add(name="dp1_ip")
-    dp1_ip.set(address=tc["p1Ip"], gateway=tc["p1Gateway"], prefix=tc["p1Prefix"])
-
-
-    dp2_eth = dp2.ethernets.add(name="dp2_eth")
-    dp2_eth.connection.port_name = p2.name
-    dp2_eth.mac = tc["p2Mac"]
-    dp2_eth.mtu = 1500
-
-    dp2_ip = dp2_eth.ipv4_addresses.add(name="dp2_ip")
-    dp2_ip.set(address=tc["p2Ip"], gateway=tc["p2Gateway"], prefix=tc["p2Prefix"])
-
 
     for i in range(0, 2):
         f = c.flows.add()
@@ -87,12 +64,13 @@ def traffic_config(api, tc):
 
     fp1_v4 = c.flows[0]
     fp1_v4.name = "fp1_v4"
-    fp1_v4.tx_rx.device.set(
-        tx_names=[dp1_ip.name], rx_names=[dp2_ip.name]
+    fp1_v4.tx_rx.port.set(
+        tx_name=p1.name, rx_names=[p2.name]
     )
 
     fp1_v4_eth, fp1_v4_ip, fp1_v4_tcp = fp1_v4.packet.ethernet().ipv4().tcp()
-    fp1_v4_eth.src.value = dp1_eth.mac
+    fp1_v4_eth.src.value = tc["p1Mac"]
+    fp1_v4_eth.dst.value = "12:bd:b6:a9:0e:83"
     fp1_v4_ip.src.value = tc["p1Ip"]
     fp1_v4_ip.dst.value = tc["p2Ip"]
     fp1_v4_tcp.src_port.value = 5000
@@ -100,12 +78,13 @@ def traffic_config(api, tc):
 
     fp2_v4 = c.flows[1]
     fp2_v4.name = "fp2_v4"
-    fp2_v4.tx_rx.device.set(
-        tx_names=[dp2_ip.name], rx_names=[dp1_ip.name]
+    fp2_v4.tx_rx.port.set(
+        tx_name=p2.name, rx_names=[p1.name]
     )
 
     fp2_v4_eth, fp2_v4_ip, fp2_v4_tcp = fp2_v4.packet.ethernet().ipv4().tcp()
-    fp2_v4_eth.src.value = dp2_eth.mac
+    fp1_v4_eth.src.value = tc["p2Mac"]
+    fp1_v4_eth.dst.value = "12:bd:b6:a9:0e:83"
     fp2_v4_ip.src.value = tc["p2Ip"]
     fp2_v4_ip.dst.value = tc["p1Ip"]
     fp2_v4_tcp.src_port.value = 5000
