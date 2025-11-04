@@ -12,7 +12,7 @@ def Test_traffic():
         "trafficDuration": 20,
     }
 
-    api = snappi.api(location="https://127.0.0.1:8443", verify=False)
+    api = snappi.api(location="https://localhost:8443", verify=False)
 
     c = traffic_config(api, test_const)
 
@@ -47,7 +47,8 @@ def traffic_config(api, tc):
     for i in range(0, 2):
         f = c.flows.add()
         f.duration.fixed_packets.packets = tc["pktCount"]
-        f.rate.pps = tc["pktRate"]
+        # f.rate.pps = tc["pktRate"]
+        f.rate.mbps = 2
         f.size.fixed = tc["pktSize"]
         f.metrics.enable = True
 
@@ -58,7 +59,7 @@ def traffic_config(api, tc):
     )
 
     fp1_eth, fp1_ip, fp1_tcp = fp1.packet.ethernet().ipv4().tcp()
-    fp1_eth.src.value = "12:bd:b6:a9:0e:00"
+    fp1_eth.src.value = "12:fe:d0:27:e1:03"
     fp1_eth.dst.value = "12:bd:b6:a9:0e:83"
     fp1_ip.src.value = "10.0.2.12"
     fp1_ip.dst.value = "10.0.2.22"
@@ -72,7 +73,7 @@ def traffic_config(api, tc):
     )
 
     fp2_eth, fp2_ip, fp2_tcp = fp2.packet.ethernet().ipv4().tcp()
-    fp2_eth.src.value = "12:bd:b6:a9:01:01"
+    fp2_eth.src.value = "12:7d:f7:11:a6:95"
     fp2_eth.dst.value = "12:bd:b6:a9:0e:83"
     fp2_ip.src.value = "10.0.2.22"
     fp2_ip.dst.value = "10.0.2.12"

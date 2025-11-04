@@ -1,2 +1,128 @@
-# Lab 01
+# Lab 01 Instructions
 
+## Overview
+This lab uses snappi to control the free Ixia-c Community Edition (OTG Test Tool) to send raw traffic in a 2 servers AWS topology. These servers are part of the same VPC / subnet and will use the private IP and MAC addresses associated to the test interfaces. This lab has 2 parts. In the first part (traffic only) we will deploy the Ixia-C traffic engines and controller using **docker run** then in the second part (protocols and traffic) we will add the Ixia-c Protocol Engine component and the deployment process will be simplified by using **docker compose**.
+
+The test scripts have been already created and the goal of the lab is to instruct users how to send traffic between the 2 servers with various parameters.
+
+
+
+## Prerequisites
+- Check your docker version
+
+```Shell
+docker version
+```
+- Install snappi
+
+```Shell
+python3 -m pip install --upgrade snappi --break-system-packages
+```
+- Clone the git repository associated with this workshop 
+
+```Shell
+git clone https://github.com/open-traffic-generator/ac4-workshop.git
+```
+
+Optionally, you can set this up in your Visual Studio Code. You will need to install the “Remote SSH” and “Remote Explorer” extensions then add your ssh connection using the previously downloaded ssh key. 
+
+![remote](../Docs/images/image-1.png)
+
+![new remote](../Docs/images/image-2.png)
+
+Example SSH command for Windows:
+
+`
+ssh -i C:\\Users\\USER\\Downloads\\ENA8FWiOpusuWSA3PIMPcocw2_aws_rsa ubuntu@SERVERIP
+`
+
+Example SSH command for Mac or Linux:
+
+`
+ssh -i /home/USER/Downloads/ENA8FWiOpusuWSA3PIMPcocw2_aws_rsa ubuntu@SERVERIP
+`
+
+## Execution
+### Part 1
+
+
+We'll deploy 2 containers on VM1 (KENG tontroller and Ixia-C traffic engine) and one container on VM2 (Ixia-C traffic engine) using ***docker run***
+
+![alt text](../Docs/images/lab1-1.png)
+
+On VM1 deploy the controller. Here we're using the network mode "host" but Ixia-C containers could also be deployed in custom bridge. [Ixia-C deployments examples](https://github.com/open-traffic-generator/ixia-c/tree/main/deployments)
+```Shell
+docker run -d --name=keng-controller --network host ghcr.io/open-traffic-generator/keng-controller:1.40.0-15 --accept-eula --http-port 8443
+```
+
+On VM1 deploy the Ixia-C traffic engine. Notice the nic name **ens6**  used.
+```Shell
+docker run --privileged -d                    \
+   --name=lab-01-traffic-engine               \
+   --network host                             \
+   -e OPT_LISTEN_PORT="5551"                  \
+   -e ARG_IFACE_LIST="virtual@af_packet,ens6" \
+   -e OPT_NO_HUGEPAGES="Yes"                  \
+   -e OPT_NO_PINNING="Yes"                    \
+   -e WAIT_FOR_IFACE="Yes"                    \
+   -e OPT_ADAPTIVE_CPU_USAGE="Yes"            \
+   ghcr.io/open-traffic-generator/ixia-c-traffic-engine:1.8.0.245             
+```
+On VM2 deploy the Ixia-C traffic engine.
+```Shell
+docker run --privileged -d                    \
+   --name=lab-01-traffic-engine               \
+   --network host                             \
+   -e OPT_LISTEN_PORT="5551"                  \
+   -e ARG_IFACE_LIST="virtual@af_packet,ens6" \
+   -e OPT_NO_HUGEPAGES="Yes"                  \
+   -e OPT_NO_PINNING="Yes"                    \
+   -e WAIT_FOR_IFACE="Yes"                    \
+   -e OPT_ADAPTIVE_CPU_USAGE="Yes"            \
+   ghcr.io/open-traffic-generator/ixia-c-traffic-engine:1.8.0.245             
+```
+On VM1 open lab-01-part1.py and set the controller and port location attributes. This is the management IP for each Ixia-c port. Since we're using the controller on VM1, the location of port1 should be 'localhost' but the location of port2 should point to the management IP of VM2 host. This address usually is present in the prompt
+
+![alt text](../Docs/images/lab1-3.png)
+
+
+Since we're running in AWS VPC, promiscuous mode is disabled and the endpoints must match the interface configurations. 
+
+On VM1 run `arp` to find out the MAC address of your gateway (10.0.2.1), then run `ip address` to find out the interface MAC and IPv4
+
+![alt text](../Docs/images/lab1-4.png)
+![alt text](../Docs/images/lab1-5.png)
+
+On VM2 terminal, run `ip address` to retrieve the MAC and IPv4 interface information. The gw address is the same as on VM1
+
+![alt text](../Docs/images/lab1-6.png)
+
+Back on VM1 let's open the script lab-01-part1.py and make these changes. There are 2 flows, one for each transmitting port.
+
+![alt text](../Docs/images/lab1-7.png)
+
+Run the script and observe the results
+
+```Shell
+python3 lab-01-part1.py
+```
+![alt text](../Docs/images/lab1-10.png)
+
+Change the script to generate 2 Mbps on each flow and rerun
+
+![alt text](../Docs/images/lab1-8.png)
+
+![alt text](../Docs/images/lab1-9.png)
+
+Stop and remove the containers for part1 of this lab
+
+```Shell
+docker stop $(docker ps -aq) && docker rm $(docker ps -aq)
+```
+
+
+### Part 2
+
+This time we're adding the Ixia-C Protocol Engine component. This will ensure that ARP is resolved and the destination MAC address is automatically populated.
+
+![alt text](../Docs/images/lab1-2.png)
