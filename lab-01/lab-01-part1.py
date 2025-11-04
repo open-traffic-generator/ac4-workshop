@@ -18,16 +18,10 @@ def Test_traffic():
 
     api.set_config(c)
 
-    # start_capture(api)
-
     start_transmit(api)
 
     wait_for(lambda: flow_metrics_ok(api, test_const), "flow metrics",2,90)
 
-    # stop_capture(api)
-
-    # get_capture(api, "p2", "p2.pcap")
-    # get_capture(api, "p1", "p1.pcap")
 
 
 def traffic_config(api, tc):
@@ -36,19 +30,10 @@ def traffic_config(api, tc):
     p1 = c.ports.add(name="p1", location="localhost:5551")
     p2 = c.ports.add(name="p2", location="10.0.10.12:5551")
     
-    # capture configuration
-
-    p2_capture = c.captures.add(name="p2_capture")
-    p2_capture.set(port_names=["p2"],format="pcap",overwrite=True)
-    
-    p1_capture = c.captures.add(name="p1_capture")
-    p1_capture.set(port_names=["p1"],format="pcap",overwrite=True)
-
     for i in range(0, 2):
         f = c.flows.add()
         f.duration.fixed_packets.packets = tc["pktCount"]
-        # f.rate.pps = tc["pktRate"]
-        f.rate.mbps = 2
+        f.rate.pps = tc["pktRate"]
         f.size.fixed = tc["pktSize"]
         f.metrics.enable = True
 

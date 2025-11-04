@@ -45,6 +45,13 @@ ssh -i /home/USER/Downloads/ENA8FWiOpusuWSA3PIMPcocw2_aws_rsa ubuntu@SERVERIP
 ## Execution
 ### Part 1
 
+Let's pull the docker images needed for this lab
+
+```Shell
+docker pull ghcr.io/open-traffic-generator/keng-controller:1.40.0-15
+docker pull ghcr.io/open-traffic-generator/ixia-c-traffic-engine:1.8.0.245
+```
+
 
 We'll deploy 2 containers on VM1 (KENG tontroller and Ixia-C traffic engine) and one container on VM2 (Ixia-C traffic engine) using ***docker run***
 
@@ -52,7 +59,9 @@ We'll deploy 2 containers on VM1 (KENG tontroller and Ixia-C traffic engine) and
 
 On VM1 deploy the controller. Here we're using the network mode "host" but Ixia-C containers could also be deployed in custom bridge. [Ixia-C deployments examples](https://github.com/open-traffic-generator/ixia-c/tree/main/deployments)
 ```Shell
-docker run -d --name=keng-controller --network host ghcr.io/open-traffic-generator/keng-controller:1.40.0-15 --accept-eula --http-port 8443
+docker run -d --name=keng-controller --network host ghcr.io/open-traffic-generator/keng-controller:1.40.0-15 \
+--accept-eula \
+--http-port 8443
 ```
 
 On VM1 deploy the Ixia-C traffic engine. Notice the nic name **ens6**  used.
@@ -81,7 +90,7 @@ docker run --privileged -d                    \
    -e OPT_ADAPTIVE_CPU_USAGE="Yes"            \
    ghcr.io/open-traffic-generator/ixia-c-traffic-engine:1.8.0.245             
 ```
-On VM1 open lab-01-part1.py and set the controller and port location attributes. This is the management IP for each Ixia-c port. Since we're using the controller on VM1, the location of port1 should be 'localhost' but the location of port2 should point to the management IP of VM2 host. This address usually is present in the prompt
+On VM1 open **lab-01-part1.py** and set the controller and port location attributes. This is the management IP for each Ixia-c port. Since we're using the controller on VM1, the location of port1 should be 'localhost' but the location of port2 should point to the management IP of VM2 host. This address usually is present in the prompt
 
 ![alt text](../Docs/images/lab1-3.png)
 
@@ -123,6 +132,32 @@ docker stop $(docker ps -aq) && docker rm $(docker ps -aq)
 
 ### Part 2
 
-This time we're adding the Ixia-C Protocol Engine component. This will ensure that ARP is resolved and the destination MAC address is automatically populated.
+This time we're adding the Ixia-C Protocol Engine component. This will ensure that ARP is resolved and the destination MAC address is automatically populated. As you can see in the diagram below we need to deploy 3 containers on each VM but we will only use one controller (VM1 Keng controller)
 
 ![alt text](../Docs/images/lab1-2.png)
+
+The configuration will include devices which will be used as endpoints for traffic.
+Open **compose.yml** file and notice the 3 containers. We're binding the traffic engine to **ens6** and the Ixia-C Protocol Engine is using the Ixia-C Traffic Engine network setting. 
+
+![alt text](../Docs/images/lab1-11.png)
+
+On both terminals run **docker compose** to deploy the containers
+
+```Shell
+cd ~/ac4-workshop/lab-01/
+docker compose up -d
+```
+
+Check the containers and the traffic engine log from one of them.
+
+```Shell
+docker ps
+docker logs lab-01-traffic_engine-1
+```
+
+Check the ***Interface ens6 found*** log
+
+![alt text](../Docs/images/lab1-12.png)
+
+Let's open the script **lab-01-part2.py** and make the changes to match the interface information: management IP, test IP and MAC address. You can use `arp` and `ip address` commands to retrieve that.
+Now the information is part of the test constants array.

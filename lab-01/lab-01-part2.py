@@ -6,23 +6,23 @@ import time
    
 def Test_traffic():
     test_const = {
-        "p1_location": "",
-        "p2_location": "",
+        "p1_location": "localhost:5551+localhost:50071",
+        "p2_location": "10.0.10.12:5551+10.0.10.12:50071",
         "pktRate": 200,
-        "pktCount": 100000,
+        "pktCount": 12000,
         "pktSize": 128,
         "trafficDuration": 20,
-        "p1Mac": "0a:ff:d8:c7:9d:0b",
-        "p1Ip": "10.0.2.22",
+        "p1Mac": "12:fe:d0:27:e1:03",
+        "p1Ip": "10.0.2.12",
         "p1Gateway": "10.0.2.1",
         "p1Prefix": 24,
-        "p2Mac": "0a:ff:c7:75:c5:bf",
-        "p2Ip": "10.0.2.12",
+        "p2Mac": "12:7d:f7:11:a6:95",
+        "p2Ip": "10.0.2.22",
         "p2Gateway": "10.0.2.1",
         "p2Prefix": 24,
     }
 
-    api = snappi.api(location="https://127.0.0.1:8443", verify=False)
+    api = snappi.api(location="https://localhost:8443", verify=False)
 
     c = traffic_config(api, test_const)
 
@@ -48,31 +48,24 @@ def traffic_config(api, tc):
     p1 = c.ports.add(name="p1", location=tc["p1_location"])
     p2 = c.ports.add(name="p2", location=tc["p2_location"])
     
-    # capture configuration
-
-    p2_capture = c.captures.add(name="p2_capture")
-    p2_capture.set(port_names=["p2"],format="pcap",overwrite=True)
-    
-    p1_capture = c.captures.add(name="p1_capture")
-    p1_capture.set(port_names=["p1"],format="pcap",overwrite=True)
+    # p1_capture = c.captures.add(name="p1_capture")
+    # p1_capture.set(port_names=["p1"],format="pcap",overwrite=True)
+    # p2_capture = c.captures.add(name="p2_capture")
+    # p2_capture.set(port_names=["p2"],format="pcap",overwrite=True)
 
     dp1 = c.devices.add(name="dp1")
-    dp2 = c.devices.add(name="dp2")
-
     dp1_eth = dp1.ethernets.add(name="dp1_eth")
     dp1_eth.connection.port_name = p1.name
     dp1_eth.mac = tc["p1Mac"]
     dp1_eth.mtu = 1500
-
     dp1_ip = dp1_eth.ipv4_addresses.add(name="dp1_ip")
     dp1_ip.set(address=tc["p1Ip"], gateway=tc["p1Gateway"], prefix=tc["p1Prefix"])
 
-
+    dp2 = c.devices.add(name="dp2")
     dp2_eth = dp2.ethernets.add(name="dp2_eth")
     dp2_eth.connection.port_name = p2.name
     dp2_eth.mac = tc["p2Mac"]
     dp2_eth.mtu = 1500
-
     dp2_ip = dp2_eth.ipv4_addresses.add(name="dp2_ip")
     dp2_ip.set(address=tc["p2Ip"], gateway=tc["p2Gateway"], prefix=tc["p2Prefix"])
 
