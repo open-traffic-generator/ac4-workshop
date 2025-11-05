@@ -58,7 +58,7 @@ nodes: {
 nodes: {
     name: "otg"
     vendor: KEYSIGHT
-    version: "1.40.0-15" # Please update this with the local version from ixiatg-configmap.yaml
+    version: "1.40.0-15"
 }
 links: {
     a_node: "otg"
