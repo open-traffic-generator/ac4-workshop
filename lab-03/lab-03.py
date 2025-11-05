@@ -6,26 +6,25 @@ import time
    
 def Test_traffic():
     test_const = {
+        "p1_location": "eth1",
+        "p2_location": "eth2",
+        "p3_location": "eth3",
         "lineRatePercentage": 1,
-        "mbpsRate": 1,
+        "rate": 100,
         "trafficDuration": 60,
-        "pktSize": 1500,
-        "1Mac": "00:00:01:01:01:01",
-        "1Ip": "193.168.11.2",
-        "1Gateway": "193.168.11.1",
-        "1Prefix": 24,
-        "2Mac": "00:00:01:01:02:01",
-        "2Ip": "193.168.11.1",
-        "2Gateway": "193.168.11.2",
-        "2Prefix": 24,
+        "pktSize": 500,
+        "p1Mac": "00:00:01:01:01:01",
+        "p1Ip": "193.168.11.2",
+        "p2Mac": "00:00:01:01:02:01",
+        "p2Ip": "193.168.22.1",
+        "p3Mac": "00:00:01:01:03:01",
+        "p3Ip": "193.168.22.2",
     }
 
     api = snappi.api(location="https://ixia-c:8443", verify=False)
     c = traffic_test(api, test_const)
 
     api.set_config(c)
-    
-    start_protocols(api)
     
     start_transmit(api)
     
@@ -35,65 +34,29 @@ def Test_traffic():
 
 def traffic_test(api, tc):
     c = api.config()
-    p1 = c.ports.add(name="p1", location="eth1")
-    p2 = c.ports.add(name="p2", location="eth2")
+    c.ports.add(name="p1", location=tc["p1_location"])
+    c.ports.add(name="p2", location=tc["p2_location"])
+    c.ports.add(name="p3", location=tc["p3_location"])
 
+    portList = ["p1", "p2", "p3"]
+    for src in portList:
+        for dst in portList:
+            if src != dst:
+                f = c.flows.add()
+                f.duration.fixed_seconds.seconds = tc["trafficDuration"]
+                f.rate.kbps = tc["rate"]
+                f.size.fixed = tc["pktSize"]
+                f.metrics.enable = True
 
+                f.name = "%s_to_%s" % (src, dst)
+                f.tx_rx.port.set(tx_name=src, rx_names=[dst])
 
-    d1 = c.devices.add(name="d1")
-    d2 = c.devices.add(name="d2")
-
-    d1_eth = d1.ethernets.add(name="d1_eth")
-    d1_eth.connection.port_name = p1.name
-    d1_eth.mac = tc["1Mac"]
-    d1_eth.mtu = 1500
-
-    d1_vlan = d1_eth.vlans.add(name="d1_vlan")
-    d1_vlan.set(id=40)
-    d1_ip = d1_eth.ipv4_addresses.add(name="d1_ip")
-    d1_ip.set(address=tc["1Ip"], gateway=tc["1Gateway"], prefix=tc["1Prefix"])
-
-    d2_eth = d2.ethernets.add(name="d2_eth")
-    d2_eth.connection.port_name = p2.name
-    d2_eth.mac = tc["2Mac"]
-    d2_eth.mtu = 1500
-    d2_vlan = d2_eth.vlans.add(name="d2_vlan")
-    d2_vlan.set(id=40)
-
-    d2_ip = d2_eth.ipv4_addresses.add(name="d2_ip")
-    d2_ip.set(address=tc["2Ip"], gateway=tc["2Gateway"], prefix=tc["2Prefix"])
-
-    f1 = c.flows.add()
-    f1.duration.fixed_seconds.seconds = tc["trafficDuration"]
-    f1.rate.mbps = tc["mbpsRate"]
-    f1.size.fixed = tc["pktSize"]
-    f1.metrics.enable = True
-    f1.metrics.latency.set(enable=True,mode="cut_through")
-
-    f1.name = "p1_p2"
-    f1.tx_rx.port.set(tx_name="p1", rx_name="p2")
-    f_eth, f_ip = f1.packet.ethernet().ipv4()
-    # f_eth, f_vlan,f_ip = f1.packet.ethernet().vlan().ipv4()
-    f_eth.src.value = d1_eth.mac
-    f_eth.dst.value = d2_eth.mac
-    # f_vlan.id.value = 40
-    f_ip.src.value = tc["1Ip"]
-    f_ip.dst.value = tc["2Ip"]
-    
-    f2 = c.flows.add()
-    f2.duration.fixed_seconds.seconds = tc["trafficDuration"]
-    f2.rate.mbps = tc["mbpsRate"]
-    f2.size.fixed = tc["pktSize"]
-    f2.metrics.enable = True
-
-    f2.name = "p2_p1"
-    f2.tx_rx.port.set(tx_name="p2", rx_name="p1")
-    f2_eth, f2_ip = f2.packet.ethernet().ipv4()
-    f2_eth.src.value = d2_eth.mac
-    f2_eth.dst.value = d1_eth.mac
-    f2_ip.src.value = tc["2Ip"]
-    f2_ip.dst.value = tc["1Ip"]
-    
+                f_eth, f_ip = f.packet.ethernet().ipv4()
+                f_eth.src.value = tc["%sMac" % src]
+                f_eth.dst.value = tc["%sMac" % dst]
+                f_ip.src.value = tc["%sIp" % src]
+                f_ip.dst.value = tc["%sIp" % dst]
+                
     return c
 
 
@@ -188,17 +151,8 @@ def get_port_metrics(api):
                 m.bytes_rx_rate,
             ]
         )
-    print(tb)
+    # print(tb)
     return metrics
-
-
-def start_protocols(api):
-    print("%s Starting protocols    ..." % datetime.now())
-    cs = api.control_state()
-    cs.choice = cs.PROTOCOL
-    cs.protocol.choice = cs.protocol.ALL
-    cs.protocol.all.state = cs.protocol.all.START
-    api.set_control_state(cs)
 
 
 def start_transmit(api):
