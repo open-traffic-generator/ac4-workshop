@@ -1,52 +1,65 @@
 name: lab-02
-prefix: ""
-
-mgmt:
-  network: lab-02-nt
-  ipv4-subnet: 172.80.80.0/24
-
 topology:
-  defaults:
-    kind: arista_ceos
-
-  kinds:
-    arista_ceos:
-      image: ceos:4.35.0
-
   nodes:
-    ### SPINES ###
-    spine1:
+    controller:
+      kind: linux
+      image: ghcr.io/open-traffic-generator/keng-controller:1.40.0-15
+      cmd: --accept-eula --http-port 8443
+      ports:
+        - 8445:8443
+    te1:
+      kind: linux
+      image: ghcr.io/open-traffic-generator/ixia-c-traffic-engine:1.8.0.245
+      env:
+        OPT_LISTEN_PORT: 5551
+        ARG_IFACE_LIST: virtual@af_packet,eth1
+        OPT_NO_HUGEPAGES: Yes
+        OPT_NO_PINNING: Yes
+        WAIT_FOR_IFACE: Yes
+    te2:
+      kind: linux
+      image: ghcr.io/open-traffic-generator/ixia-c-traffic-engine:1.8.0.245
+      env:
+        OPT_LISTEN_PORT: 5551
+        ARG_IFACE_LIST: virtual@af_packet,eth2
+        OPT_NO_HUGEPAGES: Yes
+        OPT_NO_PINNING: Yes
+        WAIT_FOR_IFACE: Yes
+    te3:
+      kind: linux
+      image: ghcr.io/open-traffic-generator/ixia-c-traffic-engine:1.8.0.245
+      env:
+        OPT_LISTEN_PORT: 5551
+        ARG_IFACE_LIST: virtual@af_packet,eth3
+        OPT_NO_HUGEPAGES: Yes
+        OPT_NO_PINNING: Yes
+        WAIT_FOR_IFACE: Yes
+    pe1:
+      kind: linux
+      image: ghcr.io/open-traffic-generator/ixia-c-protocol-engine:1.00.0.482
+      network-mode: container:te1
+      startup-delay: 5
+      env:
+        INTF_LIST: eth1
+    pe2:
+      kind: linux
+      image: ghcr.io/open-traffic-generator/ixia-c-protocol-engine:1.00.0.482
+      network-mode: container:te2
+      startup-delay: 5
+      env:
+        INTF_LIST: eth2
+    pe3:
+      kind: linux
+      image: ghcr.io/open-traffic-generator/ixia-c-protocol-engine:1.00.0.482
+      network-mode: container:te3
+      startup-delay: 5
+      env:
+        INTF_LIST: eth3
+    ceos:
       kind: arista_ceos
-      group: spine
-      startup-config: ./configs/spine1.cfg
-      mgmt-ipv4: 172.80.80.21
-    spine2:
-      kind: arista_ceos
-      group: spine
-      startup-config: ./configs/spine2.cfg
-      mgmt-ipv4: 172.80.80.22
-
-    ### LEAFS ###
-    leaf1:
-      kind: arista_ceos
-      mgmt-ipv4: 172.80.80.11
-      startup-config: ./configs/leaf1.cfg
-      group: leaf
-    leaf2:
-      kind: arista_ceos
-      mgmt-ipv4: 172.80.80.12
-      startup-config: ./configs/leaf2.cfg
-      group: leaf
-
-    ### CLIENTS ###
-    ixia-c:
-      kind: keysight_ixia-c-one
-      image: ghcr.io/open-traffic-generator/ixia-c-one:1.40.0-15
-
+      image: ceos:4.35.0
+      startup-config: lab-02-ceos.cfg
   links:
-    - endpoints: ["spine1:eth1", "leaf1:eth1"]
-    - endpoints: ["spine1:eth2", "leaf2:eth1"]
-    - endpoints: ["spine2:eth1", "leaf1:eth2"]
-    - endpoints: ["spine2:eth2", "leaf2:eth2"]
-    - endpoints: ["leaf1:eth3", "ixia-c:eth1"]
-    - endpoints: ["leaf2:eth3", "ixia-c:eth2"]
+    - endpoints: ["te1:eth1","ceos:eth1"]
+    - endpoints: ["te2:eth2","ceos:eth2"]
+    - endpoints: ["te3:eth3","ceos:eth3"]

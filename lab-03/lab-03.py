@@ -4,204 +4,98 @@ from datetime import datetime
 import time
 
    
-def Test_ibgp_route_prefix():
+def Test_traffic():
     test_const = {
-        "pktRate": 1000,
-        "pktCount": 1500000,
-        "pktSize": 100,
-        "bgpAs": 65001,
+        "lineRatePercentage": 1,
+        "mbpsRate": 1,
+        "trafficDuration": 60,
+        "pktSize": 1500,
         "1Mac": "00:00:01:01:01:01",
-        "1Ip": "192.168.11.2",
-        "1Gateway": "192.168.11.1",
+        "1Ip": "193.168.11.2",
+        "1Gateway": "193.168.11.1",
         "1Prefix": 24,
         "2Mac": "00:00:01:01:02:01",
-        "2Ip": "192.168.22.2",
-        "2Gateway": "192.168.22.1",
+        "2Ip": "193.168.11.1",
+        "2Gateway": "193.168.11.2",
         "2Prefix": 24,
-        "3Mac": "00:00:01:01:03:01",
-        "3Ip": "192.168.33.2",
-        "3Gateway": "192.168.33.1",
-        "3Prefix": 24,
-        "routeCount": 5,
-        "1AdvRoute": "101.10.10.1",
-        "startDstRoute": "201.30.30.1",
     }
 
-    api = snappi.api(location="https://clab-lab-03-controller:8443", verify=False)
-    c = ibgp_route_prefix_config(api, test_const)
+    api = snappi.api(location="https://ixia-c:8443", verify=False)
+    c = traffic_test(api, test_const)
 
     api.set_config(c)
     
     start_protocols(api)
     
-    wait_for(lambda: bgp_metrics_ok(api, test_const),"correct bgp peering",2,60)
-    
-    get_bgp_prefixes(api)
-    
     start_transmit(api)
     
-    start = time.time()
+    wait_for(lambda: traffic_stopped(api), "traffic stopped",2,500)
 
-    while True:
-        get_flow_metrics(api)
-        get_port_metrics(api)
-        if time.time() - start > (test_const["pktCount"]/test_const["pktRate"])/2:
-            break
-        time.sleep(2)
-
- 
-    # link_operation(api, "down")
-
-    time.sleep(2)
     
-    get_bgp_prefixes(api)    
-    
-    wait_for(lambda: traffic_stopped(api), "traffic stopped",2,90)
 
-    get_convergence_time(api,test_const)
-    
-    # link_operation(api, "up")
-
-
-def ibgp_route_prefix_config(api, tc):
+def traffic_test(api, tc):
     c = api.config()
-    p1 = c.ports.add(name="p1", location="clab-lab-03-te1:5551+clab-lab-03-te1:50071")
-    p2 = c.ports.add(name="p2", location="clab-lab-03-te2:5551+clab-lab-03-te2:50071")
-    p3 = c.ports.add(name="p3", location="clab-lab-03-te3:5551+clab-lab-03-te3:50071")
+    p1 = c.ports.add(name="p1", location="eth1")
+    p2 = c.ports.add(name="p2", location="eth2")
+
 
 
     d1 = c.devices.add(name="d1")
     d2 = c.devices.add(name="d2")
-    d3 = c.devices.add(name="d3")
 
     d1_eth = d1.ethernets.add(name="d1_eth")
     d1_eth.connection.port_name = p1.name
     d1_eth.mac = tc["1Mac"]
     d1_eth.mtu = 1500
 
+    d1_vlan = d1_eth.vlans.add(name="d1_vlan")
+    d1_vlan.set(id=40)
     d1_ip = d1_eth.ipv4_addresses.add(name="d1_ip")
     d1_ip.set(address=tc["1Ip"], gateway=tc["1Gateway"], prefix=tc["1Prefix"])
-
-    d1.bgp.router_id = tc["1Ip"]
-    d1_bgpv4 = d1.bgp.ipv4_interfaces.add(ipv4_name=d1_ip.name)
-
-    d1_bgpv4_peer = d1_bgpv4.peers.add(name="d1_bgpv4_peer")
-    d1_bgpv4_peer.set(
-        as_number=tc["bgpAs"], as_type=d1_bgpv4_peer.IBGP, peer_address=tc["1Gateway"]
-    )
-    d1_bgpv4_peer.learned_information_filter.set(
-        unicast_ipv4_prefix=True, unicast_ipv6_prefix=True
-    )
-    d1_bgpv4_peer_rrv4 = d1_bgpv4_peer.v4_routes.add(name="d1_bgpv4_peer_rrv4")
-    d1_bgpv4_peer_rrv4.set(
-        next_hop_ipv4_address=tc["1Ip"],
-        next_hop_address_type=d1_bgpv4_peer_rrv4.IPV4,
-        next_hop_mode=d1_bgpv4_peer_rrv4.MANUAL,
-    )
-    d1_bgpv4_peer_rrv4.addresses.add(
-        address=tc["1AdvRoute"], prefix=32, count=tc["routeCount"], step=1
-    )
 
     d2_eth = d2.ethernets.add(name="d2_eth")
     d2_eth.connection.port_name = p2.name
     d2_eth.mac = tc["2Mac"]
     d2_eth.mtu = 1500
+    d2_vlan = d2_eth.vlans.add(name="d2_vlan")
+    d2_vlan.set(id=40)
 
     d2_ip = d2_eth.ipv4_addresses.add(name="d2_ip")
     d2_ip.set(address=tc["2Ip"], gateway=tc["2Gateway"], prefix=tc["2Prefix"])
 
-    d2.bgp.router_id = tc["2Ip"]
+    f1 = c.flows.add()
+    f1.duration.fixed_seconds.seconds = tc["trafficDuration"]
+    f1.rate.mbps = tc["mbpsRate"]
+    f1.size.fixed = tc["pktSize"]
+    f1.metrics.enable = True
+    f1.metrics.latency.set(enable=True,mode="cut_through")
 
-    d2_bgpv4 = d2.bgp.ipv4_interfaces.add()
-    d2_bgpv4.ipv4_name = d2_ip.name
-
-    d2_bgpv4_peer = d2_bgpv4.peers.add(name="d2_bgpv4_peer")
-    d2_bgpv4_peer.set(
-        as_number=tc["bgpAs"], as_type=d2_bgpv4_peer.IBGP, peer_address=tc["2Gateway"]
-    )
-    d2_bgpv4_peer.learned_information_filter.set(
-        unicast_ipv4_prefix=True, unicast_ipv6_prefix=True
-    )
-
-    d2_bgpv4_peer_rrv4 = d2_bgpv4_peer.v4_routes.add(name="d2_bgpv4_peer_rrv4")
-    d2_bgpv4_peer_rrv4.set(
-        next_hop_ipv4_address=tc["2Ip"],
-        next_hop_address_type=d2_bgpv4_peer_rrv4.IPV4,
-        next_hop_mode=d2_bgpv4_peer_rrv4.MANUAL,
-    )
-    d2_bgpv4_peer_rrv4.addresses.add(
-        address=tc["startDstRoute"], prefix=32, count=tc["routeCount"], step=1
-    )
-    d2_bgpv4_peer_rrv4.advanced.set(
-        local_preference = 300,
-        multi_exit_discriminator = 300
-    )
-    
-    d3_eth = d3.ethernets.add(name="d3_eth")
-    d3_eth.connection.port_name = p3.name
-    d3_eth.mac = tc["3Mac"]
-    d3_eth.mtu = 1500
-
-    d3_ip = d3_eth.ipv4_addresses.add(name="d3_ip")
-    d3_ip.set(address=tc["3Ip"], gateway=tc["3Gateway"], prefix=tc["3Prefix"])
-
-    d3.bgp.router_id = tc["3Ip"]
-
-    d3_bgpv4 = d3.bgp.ipv4_interfaces.add()
-    d3_bgpv4.ipv4_name = d3_ip.name
-
-    d3_bgpv4_peer = d3_bgpv4.peers.add(name="d3_bgpv4_peer")
-    d3_bgpv4_peer.set(
-        as_number=tc["bgpAs"], as_type=d3_bgpv4_peer.IBGP, peer_address=tc["3Gateway"]
-    )
-    d3_bgpv4_peer.learned_information_filter.set(
-        unicast_ipv4_prefix=True, unicast_ipv6_prefix=True
-    )
-
-    d3_bgpv4_peer_rrv4 = d3_bgpv4_peer.v4_routes.add(name="d3_bgpv4_peer_rrv4")
-    d3_bgpv4_peer_rrv4.set(
-        next_hop_ipv4_address=tc["3Ip"],
-        next_hop_address_type=d3_bgpv4_peer_rrv4.IPV4,
-        next_hop_mode=d3_bgpv4_peer_rrv4.MANUAL,
-    )
-    d3_bgpv4_peer_rrv4.addresses.add(
-        address=tc["startDstRoute"], prefix=32, count=tc["routeCount"], step=1
-    )
-    d3_bgpv4_peer_rrv4.advanced.set(
-        local_preference = 300,
-        multi_exit_discriminator = 300
-    )
-    
-    f = c.flows.add()
-    f.duration.fixed_packets.packets = tc["pktCount"]
-    f.rate.pps = tc["pktRate"]
-    f.size.fixed = tc["pktSize"]
-    f.metrics.enable = True
-
-    f.name = "bgpFlow"
-    f.tx_rx.device.set(
-        tx_names=[d1_bgpv4_peer_rrv4.name], rx_names=[d2_bgpv4_peer_rrv4.name,d3_bgpv4_peer_rrv4.name]
-    )
-
-    f_eth, f_ip = f.packet.ethernet().ipv4()
+    f1.name = "p1_p2"
+    f1.tx_rx.port.set(tx_name="p1", rx_name="p2")
+    f_eth, f_ip = f1.packet.ethernet().ipv4()
+    # f_eth, f_vlan,f_ip = f1.packet.ethernet().vlan().ipv4()
     f_eth.src.value = d1_eth.mac
-    f_ip.src.increment.start = tc["1AdvRoute"]
-    f_ip.src.increment.count = tc["routeCount"]
-    f_ip.dst.increment.start = tc["startDstRoute"]
-    f_ip.dst.increment.count = tc["routeCount"]
+    f_eth.dst.value = d2_eth.mac
+    # f_vlan.id.value = 40
+    f_ip.src.value = tc["1Ip"]
+    f_ip.dst.value = tc["2Ip"]
+    
+    f2 = c.flows.add()
+    f2.duration.fixed_seconds.seconds = tc["trafficDuration"]
+    f2.rate.mbps = tc["mbpsRate"]
+    f2.size.fixed = tc["pktSize"]
+    f2.metrics.enable = True
 
+    f2.name = "p2_p1"
+    f2.tx_rx.port.set(tx_name="p2", rx_name="p1")
+    f2_eth, f2_ip = f2.packet.ethernet().ipv4()
+    f2_eth.src.value = d2_eth.mac
+    f2_eth.dst.value = d1_eth.mac
+    f2_ip.src.value = tc["2Ip"]
+    f2_ip.dst.value = tc["1Ip"]
+    
     return c
 
-
-def bgp_metrics_ok(api, tc):
-    for m in get_bgpv4_metrics(api):
-        if (
-            m.session_state == m.DOWN
-            or m.routes_advertised < tc["routeCount"]
-            or m.routes_received < tc["routeCount"]
-        ):
-            return False
-    return True
 
 
 def traffic_stopped(api):
@@ -210,81 +104,6 @@ def traffic_stopped(api):
         if m.transmit != m.STOPPED:
             return False
     return True
-
-
-def get_bgpv4_metrics(api):
-    print("%s Getting bgpv4 metrics    ..." % datetime.now())
-    req = api.metrics_request()
-    req.bgpv4.peer_names = []
-
-    metrics = api.get_metrics(req).bgpv4_metrics
-
-    tb = Table(
-        "BGPv4 Metrics",
-        [
-            "Name",
-            "State",
-            "Routes Adv.",
-            "Routes Rec.",
-        ],
-    )
-
-    for m in metrics:
-        tb.append_row(
-            [
-                m.name,
-                m.session_state,
-                m.routes_advertised,
-                m.routes_received,
-            ]
-        )
-
-    print(tb)
-    return metrics
-
-
-def get_bgp_prefixes(api):
-    print("%s Getting BGP prefixes    ..." % datetime.now())
-    req = api.states_request()
-    req.bgp_prefixes.bgp_peer_names = []
-    bgp_prefixes = api.get_states(req).bgp_prefixes
-
-    tb = Table(
-        "BGP Prefixes",
-        [
-            "Name",
-            "IPv4 Address",
-            "IPv4 Next Hop",
-            "IPv6 Address",
-            "IPv6 Next Hop",
-        ],
-        20,
-    )
-
-    for b in bgp_prefixes:
-        for p in b.ipv4_unicast_prefixes:
-            tb.append_row(
-                [
-                    b.bgp_peer_name,
-                    "{}/{}".format(p.ipv4_address, p.prefix_length),
-                    p.ipv4_next_hop,
-                    "",
-                    "" if p.ipv6_next_hop is None else p.ipv6_next_hop,
-                ]
-            )
-        for p in b.ipv6_unicast_prefixes:
-            tb.append_row(
-                [
-                    b.bgp_peer_name,
-                    "",
-                    "" if p.ipv4_next_hop is None else p.ipv4_next_hop,
-                    "{}/{}".format(p.ipv6_address, p.prefix_length),
-                    p.ipv6_next_hop,
-                ]
-            )
-
-    print(tb)
-    return bgp_prefixes
 
 
 def get_flow_metrics(api):
@@ -400,30 +219,6 @@ def stop_transmit(api):
     api.set_control_state(cs)
 
 
-
-def link_operation(api, operation):
-    print("%s Bringing %s port 2    ..." % (datetime.now(),operation))
-    cs = api.control_state()
-    cs.choice = cs.PORT
-    cs.port.choice = cs.port.LINK
-    cs.port.link.port_names = ["p2"]
-    if operation == "down":
-        cs.port.link.state = cs.port.link.DOWN
-    else:
-        cs.port.link.state = cs.port.link.UP
-    api.set_control_state(cs)
-
-
-def get_convergence_time(api,tc):
-    mr = api.metrics_request()
-    mr.flow.flow_names = ["bgpFlow"]
-    m = api.get_metrics(mr).flow_metrics[0]
-    
-    convergence = (m.frames_tx - m.frames_rx)/tc["pktRate"]
-    print("%s Convergence time was %ss" % (datetime.now(), convergence))
-
-
-
 def wait_for(func, condition_str, interval_seconds=None, timeout_seconds=None):
     """
     Keeps calling the `func` until it returns true or `timeout_seconds` occurs
@@ -502,4 +297,4 @@ class Table(object):
 
 
 if __name__ == "__main__":
-    Test_ibgp_route_prefix()
+    Test_traffic()
