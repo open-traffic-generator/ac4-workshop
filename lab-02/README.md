@@ -1,2 +1,81 @@
 # Lab 02
 
+## Overview
+
+This lab uses [**containerlab**](https://containerlab.dev/) to deploy 3 pairs or Ixia-C traffic engine / protocol engine containers connected to 3 [**Arista ceos**](https://containerlab.dev/manual/kinds/ceos/) ports. The router is configured as a BGP route reflector and is expected to forward iBGP routes. The otg (Ixia-c) ports 2 and 3 are configured to advertise the same route but with different local preference and med parameters.
+
+The test script has been created and the goal of the lab is to calculate the BGP convergence when different actions are initiated on the otg peers.
+
+Deployment and logical topology below
+
+![Deployment topology](../Docs/images/lab-02/lab2-1.png)
+
+
+![Logical topology](../Docs/images/lab-02/lab2-2.png)
+
+## Prerequisites
+
+- Install **containerlab**
+
+```Shell
+bash -c "$(curl -sL https://get.containerlab.dev)"
+```
+
+
+## Execution
+
+Observe the containerlab topology file. Notice the parameters are the same as those used in the previous lab.
+
+![alt text](../Docs/images/lab-02/lab2-3.png)
+
+- Deploy the topology using containerlab
+
+```Shell
+cd ~/ac4-workshop/lab-02/ && clab deploy
+```
+![alt text](../Docs/images/lab-02/lab2-4.png)
+
+- Unlike the previous lab, with containerlab we're using custom bridge docker networking
+
+```Shell
+docker network ls
+docker inspect clab
+```
+
+- Open the test script **lab-02.py** and modify the location attributes for each port along with the controller address. Also, please set the **packet count** to 60000. 
+
+![alt text](../Docs/images/lab-02/lab2-5.png)
+
+- After the routes are advertised by each otg peer, the script will check bgp states and routes then traffic will be sent from otg port 1 towards the destination routes 201.30.30.1/32. Initially, the router should forward these packets towards otg port 2 (preferred route) but after a "link-down" operation is initiated on otg port 2, the traffic should converge towards otg port 3. The lost packets divided by the packet rate will give the convergence time.
+Let's enable the ***link-operation*** lines
+
+![alt text](../Docs/images/lab-02/lab2-6.png)
+
+- Optionally, open another terminal, connect to the DUT `ssh clab-lab-02-ceos` (password ***admin***) and watch the bgp routes on the DUT. 
+
+```Shell
+watch show ip route bgp
+```
+
+- Run the script
+
+```Shell
+python3 lab-02.py
+```
+In the first 30 seconds we should see the traffic received by "p2" (with the preferred route).
+The watcher on the DUT also shows that these 201.30.30.x routes are received on "Ethernet2" with med set to 100
+
+![alt text](../Docs/images/lab-02/lab2-7.png)
+![alt text](../Docs/images/lab-02/lab2-8.png)
+
+After 30 seconds we should see the traffic received by "p3" (the only route).
+The watcher on the DUT also shows that these 201.30.30.x routes are received on "Ethernet3" with med set to 200
+
+![alt text](../Docs/images/lab-02/lab2-9.png)
+
+![alt text](../Docs/images/lab-02/lab2-10.png)
+
+There was packet loss during the link down event. The convergence time is displayed
+
+![alt text](../Docs/images/lab-02/lab2-11.png)
+

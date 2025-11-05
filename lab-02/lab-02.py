@@ -3,11 +3,14 @@ import snappi
 from datetime import datetime
 import time
 
-   
+
 def Test_ibgp_route_prefix():
     test_const = {
+        "p1_location": "filled_by_user",
+        "p2_location": "filled_by_user",
+        "p3_location": "filled_by_user",
         "pktRate": 1000,
-        "pktCount": 1500000,
+        "pktCount": 60000,
         "pktSize": 100,
         "bgpAs": 65001,
         "1Mac": "00:00:01:01:01:01",
@@ -27,7 +30,7 @@ def Test_ibgp_route_prefix():
         "startDstRoute": "201.30.30.1",
     }
 
-    api = snappi.api(location="https://clab-lab-03-controller:8443", verify=False)
+    api = snappi.api(location="filled_by_user", verify=False)
     c = ibgp_route_prefix_config(api, test_const)
 
     api.set_config(c)
@@ -50,7 +53,7 @@ def Test_ibgp_route_prefix():
         time.sleep(2)
 
  
-    # link_operation(api, "down")
+    link_operation(api, "down")
 
     time.sleep(2)
     
@@ -60,14 +63,14 @@ def Test_ibgp_route_prefix():
 
     get_convergence_time(api,test_const)
     
-    # link_operation(api, "up")
+    link_operation(api, "up")
 
 
 def ibgp_route_prefix_config(api, tc):
     c = api.config()
-    p1 = c.ports.add(name="p1", location="clab-lab-03-te1:5551+clab-lab-03-te1:50071")
-    p2 = c.ports.add(name="p2", location="clab-lab-03-te2:5551+clab-lab-03-te2:50071")
-    p3 = c.ports.add(name="p3", location="clab-lab-03-te3:5551+clab-lab-03-te3:50071")
+    p1 = c.ports.add(name="p1", location=tc["p1_location"])
+    p2 = c.ports.add(name="p2", location=tc["p2_location"])
+    p3 = c.ports.add(name="p3", location=tc["p3_location"])
 
 
     d1 = c.devices.add(name="d1")
@@ -133,8 +136,8 @@ def ibgp_route_prefix_config(api, tc):
         address=tc["startDstRoute"], prefix=32, count=tc["routeCount"], step=1
     )
     d2_bgpv4_peer_rrv4.advanced.set(
-        local_preference = 300,
-        multi_exit_discriminator = 300
+        local_preference = 200,
+        multi_exit_discriminator = 100
     )
     
     d3_eth = d3.ethernets.add(name="d3_eth")
@@ -168,8 +171,8 @@ def ibgp_route_prefix_config(api, tc):
         address=tc["startDstRoute"], prefix=32, count=tc["routeCount"], step=1
     )
     d3_bgpv4_peer_rrv4.advanced.set(
-        local_preference = 300,
-        multi_exit_discriminator = 300
+        local_preference = 150,
+        multi_exit_discriminator = 200
     )
     
     f = c.flows.add()
