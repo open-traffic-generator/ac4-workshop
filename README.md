@@ -9,7 +9,14 @@ This repository contains NAF Autocon4 workshop materials. Each lab has its own i
 Here are the important materials that you will need to refer during the lab exercises.
 * [Overview presentation of OTG concepts](./Docs/AC2-WSA4.pdf)
 * [FAQ document](./Docs/Autocon2_WSA4_Pre-workshop%20FAQ.md)
-* Once you are connected to your vm hosts, follow along the readme files from each lab.
+
+Labs
+- [Lab-01. KENG between 2 servers](./lab-01/README.md)
+- [Lab-02. KENG for BGP Convergence](./lab-02/README.md)
+- [Lab-03. KENG in CLOS](./lab-03/README.md)
+- [Lab-04. KENG with KNE](./lab-04/README.md)
+- [Lab-05. Cyperf-CE between 2 servers](./lab-05/README.md)
+- [Lab-06. Cyperf-CE production test](./lab-06/README.md)
 
 
 You can get in touch with the OTG engineering team if you have question and comments:
