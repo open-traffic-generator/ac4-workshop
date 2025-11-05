@@ -1,14 +1,14 @@
 # Lab 01 Instructions
 
 ## Overview
-This lab uses snappi to control the free Ixia-c Community Edition (OTG Test Tool) to send raw traffic in a 2 servers AWS topology. These servers are part of the same VPC / subnet and will use the private IP and MAC addresses associated to the test interfaces. This lab has 2 parts. In the first part (traffic only) we will deploy the Ixia-C traffic engines and controller using **docker run** then in the second part (protocols and traffic) we will add the Ixia-c Protocol Engine component and the deployment process will be simplified by using **docker compose**.
+This lab uses snappi to control the free Ixia-c Community Edition (OTG Test Tool) to send traffic between 2 hosts from the same AWS VPC. The lab has 2 parts. In the first part (traffic only) we will deploy the Ixia-c traffic engines and controller using **docker run** then in the second part (protocols and traffic) we will add the Ixia-c Protocol Engine component. The deployment will be simplified by using **docker compose**.
 
-The test scripts have been already created and the goal of the lab is to instruct users how to send traffic between the 2 servers with various parameters.
+The test scripts have been already created and the goal of the lab is to instruct users how to send traffic between these 2 servers with various parameters.
 
 
 
 ## Prerequisites
-- Check your docker version
+- Check docker version
 
 ```Shell
 docker version
@@ -24,11 +24,13 @@ python3 -m pip install --upgrade snappi --break-system-packages
 git clone https://github.com/open-traffic-generator/ac4-workshop.git
 ```
 
-Optionally, you can set this up in your Visual Studio Code. You will need to install the “Remote SSH” and “Remote Explorer” extensions then add your ssh connection using the previously downloaded ssh key. 
+Optionally, you can set this up in Visual Studio Code. You will need to install the “Remote SSH” and “Remote Explorer” extensions then add the VM hosts by editing the ssh config to include the IdentifyFile parameter. Refresh the list of hosts and connect.
 
 ![remote](../Docs/images/lab-01/image-1.png)
 
 ![new remote](../Docs/images/lab-01/image-2.png)
+
+![alt text](../Docs/images/lab-01/lab1-19.png)
 
 Example SSH command for Windows:
 
@@ -57,7 +59,7 @@ We'll deploy 2 containers on VM1 (KENG tontroller and Ixia-C traffic engine) and
 
 ![alt text](../Docs/images/lab-01/lab1-1.png)
 
-On VM1 deploy the controller. Here we're using the network mode "host" but Ixia-C containers could also be deployed in custom bridge. [Ixia-C deployments examples](https://github.com/open-traffic-generator/ixia-c/tree/main/deployments)
+On VM1 deploy the controller. Here we're using the network mode "host" but Ixia-C containers could also be deployed in custom bridge. [Ixia-c deployments examples](https://github.com/open-traffic-generator/ixia-c/tree/main/deployments)
 ```Shell
 docker run -d --name=keng-controller --network host ghcr.io/open-traffic-generator/keng-controller:1.40.0-15 \
 --accept-eula \
@@ -159,8 +161,9 @@ Check the ***Interface ens6 found*** log
 
 ![alt text](../Docs/images/lab-01/lab1-12.png)
 
-Let's open the script **lab-01-part2.py** and make the changes to match the interface information: management IP, test IP and MAC address. You can use `arp` and `ip address` commands to retrieve that.
-Now the information is part of the test constants array. 
+Let's open the script **lab-01-part2.py** and make the changes to match the interface information: management IP, test IP and MAC address. You can use `arp` and `ip address` commands to retrieve these.
+
+Because we're now using the protocol engine, this must be specified in the port "location" attribute. Unlike the traffic engine where the port can be changed, the protocol engine will always be "listening" on port 50071
 
 ![alt text](../Docs/images/lab-01/lab1-13.png)
 
