@@ -6,7 +6,7 @@ This lab uses [**containerlab**](https://containerlab.dev/) to deploy a clos top
 
 The included test script has 6 flows, one for each port to port direction, and the goal of the lab is to run traffic between the leaf nodes and observe the effects when network operations are executed.
 
-Deployment and logical topology below
+We will only require 1 VM for this lab. Deployment and logical topology below.
 
 ![alt text](../Docs/images/lab-03/lab3-1.png)
 

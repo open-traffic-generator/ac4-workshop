@@ -7,7 +7,7 @@ We will use both **snappi** and **gosnappi** to run the provided script and we w
 
 The goal of this lab is to familiarize the users with gosnappi and kne concepts but also with running tests over kubernetes clusters.
 
-Deployment and logical topology below.
+We will only require 1 VM for this lab. Deployment and logical topology below.
 
 ![alt text](../Docs/images/lab-04/lab4-1.png)
 
@@ -182,7 +182,7 @@ show running-config
 
 ## Cleanup
 
-- We delete the cluster using the command below.
+- We delete the cluster using the command below. 
 
 ```Shell
 kind delete cluster --name kne

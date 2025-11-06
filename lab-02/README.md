@@ -6,7 +6,7 @@ This lab uses [**containerlab**](https://containerlab.dev/) to deploy 3 pairs or
 
 The goal of the lab is to calculate the BGP convergence when different actions are initiated on the otg peers.
 
-Deployment and logical topology below
+We will only require 1 VM for this lab. Deployment and logical topology below.
 
 ![Deployment topology](../Docs/images/lab-02/lab2-1.png)
 
