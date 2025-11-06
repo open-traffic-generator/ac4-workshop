@@ -6,6 +6,8 @@ import time
    
 def Test_traffic():
     test_const = {
+        "p1_location": "filled_by_user",
+        "p2_location": "filled_by_user",
         "pktRate": 200,
         "pktCount": 1000,
         "pktSize": 128,
@@ -20,7 +22,7 @@ def Test_traffic():
         "p2Prefix": 24,
     }
 
-    api = snappi.api(location="https://172.18.0.50:8443", verify=False)
+    api = snappi.api(location="filled_by_user", verify=False)
 
     c = traffic_config(api, test_const)
 
@@ -43,8 +45,8 @@ def Test_traffic():
 def traffic_config(api, tc):
 
     c = api.config()
-    p1 = c.ports.add(name="p1", location="eth1")
-    p2 = c.ports.add(name="p2", location="eth2")
+    p1 = c.ports.add(name="p1", location=tc["p1_location"])
+    p2 = c.ports.add(name="p2", location=tc["p2_location"])
     
     # capture configuration
 

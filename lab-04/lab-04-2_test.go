@@ -14,32 +14,32 @@ import (
 func TestEbgpRoutePrefix(t *testing.T) {
 
 	testConst := map[string]interface{}{
-		"controller_location": "https://172.18.0.50:8443",
-		// "controller_location": "172.18.0.52:40051",
-		"p1_location":  "eth1",
-		"p2_location":  "eth2",
-		"pktRate":      uint64(200),
-		"pktCount":     uint32(12000),
-		"pktSize":      uint32(128),
-		"p1Mac":        "00:00:01:01:01:01",
-		"p1Ip":         "192.168.11.2",
-		"p1Gateway":    "192.168.11.1",
-		"p1Prefix":     uint32(24),
-		"p1As":         uint32(1111),
-		"p2Mac":        "00:00:01:01:01:02",
-		"p2Ip":         "192.168.22.2",
-		"p2Gateway":    "192.168.22.1",
-		"p2Prefix":     uint32(24),
-		"p2As":         uint32(1112),
-		"routeCount":   uint32(3),
-		"p1AdvRouteV4": "101.1.1.1",
-		"p2AdvRouteV4": "201.2.2.1",
+		// "controller_location": "filled by user for http transport",
+		"controller_location": "filled by user for grpc transport",
+		"p1_location":         "filled by user",
+		"p2_location":         "filled by user",
+		"pktRate":             uint64(200),
+		"pktCount":            uint32(12000),
+		"pktSize":             uint32(128),
+		"p1Mac":               "00:00:01:01:01:01",
+		"p1Ip":                "192.168.11.2",
+		"p1Gateway":           "192.168.11.1",
+		"p1Prefix":            uint32(24),
+		"p1As":                uint32(1111),
+		"p2Mac":               "00:00:01:01:01:02",
+		"p2Ip":                "192.168.22.2",
+		"p2Gateway":           "192.168.22.1",
+		"p2Prefix":            uint32(24),
+		"p2As":                uint32(1112),
+		"routeCount":          uint32(3),
+		"p1AdvRouteV4":        "101.1.1.1",
+		"p2AdvRouteV4":        "201.2.2.1",
 	}
 
 	api := gosnappi.NewApi()
 
-	api.NewHttpTransport().SetLocation(testConst["controller_location"].(string))
-	// api.NewGrpcTransport().SetLocation(testConst["controller_location"].(string))
+	// api.NewHttpTransport().SetLocation(testConst["controller_location"].(string))
+	api.NewGrpcTransport().SetLocation(testConst["controller_location"].(string))
 
 	c := ebgpRoutePrefixConfig(testConst)
 
