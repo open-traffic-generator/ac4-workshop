@@ -1,6 +1,6 @@
 # Lab 05 Instructions
 
-## Background and Overview
+## Background
 
 ![alt text](../Docs/images/lab-05/overview.png)
 
@@ -9,11 +9,10 @@ Acme Corporation operates a diverse IT environment, encompassing Software-Define
 A key characteristic of these services in todays's era of modern, cloud-native architectures built on microservices is their need to support a large number of simultaneous user connections and frequent, lightweight transactions—such as chat messages or API calls.
 
 
-
-
 ## Lab Objective
 
-To deploy [CyPerf-CE] (https://www.cyperf.com/) VM's and run a stateful connection and transaction rate test to stress the network's compute and packet-per-second capacity. We would be looking at Connections Per Second as our KPI.
+
+To deploy [**CyPerfCE**](https://www.cyperf.com/) VM's and run a stateful connection and transaction rate test to stress the network's compute and packet-per-second capacity. We would be looking at Connections Per Second as our KPI.
 
 ## Hardware Requirements
 
@@ -203,3 +202,82 @@ This test is critical because it goes beyond simple throughput measurements to e
 - Ensures Stability: By confirming performance under high concurrency, this benchmark ensures the foundation is stable for modern applications that rely on short-lived connections and frequent, small transactions.
 
 This validation provides the necessary assurance of performance at scale for critical infrastructure.
+
+
+---
+
+## 🚀 **BONUS SECTION: Running Throughput Tests with CyPerf CE!**
+
+Want to push your network to its absolute limits? In this **BONUS LAB**, we'll show you how to run *throughput* tests using CyPerf CE. While our main lab focused on measuring Connections Per Second (CPS), throughput tests measure the maximum amount of data your network can handle (bits per second).
+
+### Why Run Throughput Tests?
+
+- **Real-World Readiness:** Understand the bandwidth capabilities of your network infrastructure.
+- **Identify Bottlenecks:** Detect slow points in the path between client and server.
+- **Optimize Deployments:** Tune your systems for maximum performance.
+
+### How to Run a Throughput Test
+
+#### 1. **Start the Server**
+
+SSH into your **server VM** and start the server to listen for throughput tests:
+
+```bash
+sudo cyperf -s
+```
+Note <SERVER_IP_ADDR> to be used with client agent in next step.
+
+#### 2. **Start the Client in Throughput Mode**
+
+SSH into the **client VM** and run the following command, replacing `<SERVER_IP_ADDR>` with your server's actual IP address:
+
+```bash
+sudo cyperf -c <SERVER_IP_ADDR> -b <target_throughput>
+```
+
+```bash
+-b, --bitrate #[KMG][/#]	Target bitrate in bits/second.
+
+Default: 10G/s 
+Max: 10G/s
+This option cannot be used with --cps option.
+```
+![alt text](../Docs/images/lab-05/lab5-8.png)
+
+#### 3. **Customize Your Test!**
+
+You can add additional optional arguments, such as:
+
+- `--duration 60`  (Run the test for 60 seconds)
+- `--length 1400`  (Use 1400-byte packets)
+
+#### 4. **Read the Output**
+
+After the test completes, you'll see reports showing total throughput (in Mbps/Gbps), latency, retransmissions, and more. Use --detailed-stats for detailed result analysis
+
+![alt text](../Docs/images/lab-05/lab5-9.png)
+
+
+> Test Summary
+
+
+![alt text](../Docs/images/lab-05/lab5-10.png)
+
+
+
+### If Iperf... then Why CyPerf?
+
+Curious how CyPerf differs from the popular tool Iperf? CyPerf offers unique test workflows and cloud-native features designed for modern distributed architectures.
+
+[**Tell me**](IperfVsCyperf.md)
+
+
+---
+
+**Give it a try and see how much data your setup can move!**
+
+> *Note: You can always refer to the CyPerf CE documentation or `cyperf` for a full list of configurable options.*
+
+---
+
+
