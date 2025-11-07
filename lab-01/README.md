@@ -132,7 +132,7 @@ python3 lab-01-part1.py
 
 ![alt text](../Docs/images/lab-01/lab1-9.png)
 
-- Stop and remove the containers for part1 of this lab
+- Stop and remove the containers on both VMs for part1 of this lab.
 
 ```Shell
 docker stop $(docker ps -aq) && docker rm $(docker ps -aq)
@@ -150,7 +150,7 @@ The configuration will include devices which will be used as endpoints for traff
 
 ![alt text](../Docs/images/lab-01/lab1-11.png)
 
-- On both terminals run **docker compose** to deploy the containers
+- On both VMs run **docker compose** to deploy the containers.
 
 ```Shell
 cd ~/ac4-workshop/lab-01/
@@ -164,20 +164,20 @@ docker ps
 docker logs lab-01-traffic_engine-1
 ```
 
-- Check the ***Interface ens6 found*** log
+- You can check the ***Interface ens6 found*** log on both VMs to ensure the traffic engine is ready.
 
 ![alt text](../Docs/images/lab-01/lab1-12.png)
 
 - Let's open the script **lab-01-part2.py** and make the changes to match the interface information: management IP, test IP and MAC address. You can use `arp` and `ip address` commands to retrieve these.
-Because we're now using the protocol engine, this must be specified in the port "location" attribute. Unlike the traffic engine where the port can be changed, the protocol engine will always be "listening" on port 50071
+Because we're now using the protocol engine, this must be specified in the port "location" attribute. Unlike the traffic engine where the port can be changed, the protocol engine will always be "listening" on port 50071.
 
 ![alt text](../Docs/images/lab-01/lab1-13.png)
 
-Notice now the flow configuration has no destination mac address set. That is because we're using flow tx_rx parameter set to ***device*** which will populate the destination mac address upon completion of the ARP request
+Notice now the flow configuration has no destination mac address set. That is because we're using flow tx_rx parameter set to ***device*** which will populate the destination mac address upon completion of the ARP request.
 
 ![alt text](../Docs/images/lab-01/lab1-16.png)
 
-- Run the test and observe stats.
+- On VM1 run the test and observe stats.
 
 ![alt text](../Docs/images/lab-01/lab1-18.png)
 
@@ -186,7 +186,7 @@ Set the ***pktCount*** to 200 and run the test
 
 ![alt text](../Docs/images/lab-01/lab1-14.png)
 
-- Run `ls` at the end to see 2 files containing the captured packets. With keng we can only capture incoming packets.
+- Run `ls` at the end to see 2 files containing the captured packets. With keng we can only capture incoming packets. These files could be opened in Wireshark or Tshark for further analysis.
 
 ![alt text](../Docs/images/lab-01/lab1-15.png)
 
@@ -197,17 +197,17 @@ curl -k -X POST https://127.0.0.1:8443/monitor/metrics -d '{"choice":"port"}'
 curl -k -X POST https://127.0.0.1:8443/monitor/metrics -d '{"choice":"flow"}'
 curl -k -X POST https://127.0.0.1:8443/monitor/states -d '{"choice":"ipv4_neighbors"}'
 ```
-As you can see in the port metrics, we're receiving more frames on P1 than what P2 is sending. This is filtered correctly by Keng as see in the flow metrics.
+- As you can see in the port metrics, we're receiving more frames on P1 than what P2 is sending. This is filtered correctly by KENG as seen in the flow metrics.
 
 ![alt text](../Docs/images/lab-01/lab1-17.png)
 
-- See the entire controller configuration in json format
+- See the entire controller configuration in json format.
 
 ```Shell
 curl -k https://127.0.0.1:8443/config
 ```
 
-- Clear the containers on both VMs
+- Clear the containers on both VMs.
 
 ```Shell
 cd ~/ac4-workshop/lab-01/ && docker compose down
