@@ -2,12 +2,12 @@
 
 This repository contains NAF Autocon4 workshop materials. Each lab has its own instructions README file where users can follow along to get familiar with Open Traffic Generator (OTG) and Cyperf CE concepts. Even though the labs are independent of each other, it is strongly recommended to follow them in sequence.
 
-* For Autocon4(AC4) users: Please use the Cloudshare link received on your email to access your environment. Ask your instructor if you do not have one</B>
+* For Autocon4(AC4) users: Please use the Cloudshare link received on your email to access your environment. Ask your instructor if you do not have one.
 * For all other users: If you have come to this repository outside of the AC4 workshop hours and you do not have an active cloud environment provided for the lab, you can use any Linux instance for the labs.
 
-Here are the important materials that you will need to refer during the lab exercises.
-* [Overview presentation of OTG concepts](./Docs/AC2-WSA4.pdf)
-* [FAQ document](./Docs/Autocon2_WSA4_Pre-workshop%20FAQ.md)
+Here are the important materials that you will need to refer to during the lab exercises.
+* [Overview presentation of OTG concepts](./Docs/AC4-WSA4.pdf)
+* [FAQ document](./Docs/Autocon4_WSA4_Pre-workshop%20FAQ.md)
 
 Labs
 - [Lab-01. KENG between 2 servers](./lab-01/README.md)

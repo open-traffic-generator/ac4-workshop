@@ -6,9 +6,9 @@ import time
    
 def Test_traffic():
     test_const = {
-        "p1_location": "filled_by_user",
-        "p2_location": "filled_by_user",
-        "p3_location": "filled_by_user",
+        "p1_location": "filled by user",
+        "p2_location": "filled by user",
+        "p3_location": "filled by user",
         "lineRatePercentage": 1,
         "rate": 100,
         "trafficDuration": 60,
@@ -21,7 +21,7 @@ def Test_traffic():
         "p3Ip": "193.168.22.2",
     }
 
-    api = snappi.api(location="filled_by_user", verify=False)
+    api = snappi.api(location="filled by user", verify=False)
     c = traffic_test(api, test_const)
 
     api.set_config(c)

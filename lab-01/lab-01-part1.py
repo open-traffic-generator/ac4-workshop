@@ -12,7 +12,7 @@ def Test_traffic():
         "trafficDuration": 20,
     }
 
-    api = snappi.api(location="https://localhost:8443", verify=False)
+    api = snappi.api(location="filled by user", verify=False)
 
     c = traffic_config(api, test_const)
 
@@ -27,8 +27,8 @@ def Test_traffic():
 def traffic_config(api, tc):
 
     c = api.config()
-    p1 = c.ports.add(name="p1", location="localhost:5551")
-    p2 = c.ports.add(name="p2", location="10.0.10.12:5551")
+    p1 = c.ports.add(name="p1", location="filled by user")
+    p2 = c.ports.add(name="p2", location="filled by user")
     
     for i in range(0, 2):
         f = c.flows.add()

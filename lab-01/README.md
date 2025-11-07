@@ -24,7 +24,7 @@ python3 -m pip install --upgrade snappi --break-system-packages
 git clone https://github.com/open-traffic-generator/ac4-workshop.git
 ```
 
-Optionally, you can set this up in Visual Studio Code. You will need to install the “Remote SSH” and “Remote Explorer” extensions then add the VM hosts by editing the ssh config to include the IdentifyFile parameter. Refresh the list of hosts and connect.
+Optionally, you can set this up in Visual Studio Code. It will be much easier to modify files and start new terminals. You will need to install the “Remote SSH” and “Remote Explorer” extensions then add the VM hosts by editing the ssh config to include the IdentifyFile parameter. Refresh the list of hosts, connect, follow the prompts to continue and open the ***/home/ubuntu*** folder.
 
 ![remote](../Docs/images/lab-01/image-1.png)
 

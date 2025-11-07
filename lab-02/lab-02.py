@@ -6,9 +6,9 @@ import time
 
 def Test_ibgp_route_prefix():
     test_const = {
-        "p1_location": "filled_by_user",
-        "p2_location": "filled_by_user",
-        "p3_location": "filled_by_user",
+        "p1_location": "filled by user",
+        "p2_location": "filled by user",
+        "p3_location": "filled by user",
         "pktRate": 1000,
         "pktCount": 60000,
         "pktSize": 100,
@@ -30,7 +30,7 @@ def Test_ibgp_route_prefix():
         "startDstRoute": "201.30.30.1",
     }
 
-    api = snappi.api(location="filled_by_user", verify=False)
+    api = snappi.api(location="filled by user", verify=False)
     c = ibgp_route_prefix_config(api, test_const)
 
     api.set_config(c)
