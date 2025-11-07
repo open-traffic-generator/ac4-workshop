@@ -8,23 +8,21 @@ The test scripts have been already created and the goal of the lab is to instruc
 
 
 ## Prerequisites
-- Check docker version
 
-```Shell
-docker version
-```
-- Install snappi
+**Let's open terminals to VM1 and VM2**
+- SSH command example below for Windows using PowerShell or CMD.
 
-```Shell
-python3 -m pip install --upgrade snappi --break-system-packages
-```
-- Clone the git repository associated with this workshop 
+`
+ssh -i C:\\Users\\USER\\Downloads\\ENA8FWiOpusuWSA3PIMPcocw2_aws_rsa ubuntu@VM_EXTERNAL_IP
+`
 
-```Shell
-git clone https://github.com/open-traffic-generator/ac4-workshop.git
-```
+- SSH command example below for Linux / MacOS terminal.
 
-Optionally, you can set this up in Visual Studio Code. It will be much easier to modify files and start new terminals. You will need to install the “Remote SSH” and “Remote Explorer” extensions then add the VM hosts by editing the ssh config to include the IdentifyFile parameter. Refresh the list of hosts, connect, follow the prompts to continue and open the ***/home/ubuntu*** folder.
+`
+ssh -i /home/USER/Downloads/ENA8FWiOpusuWSA3PIMPcocw2_aws_rsa ubuntu@VM_EXTERNAL_IP
+`
+
+- Or optionally, you can set this up in Visual Studio Code. It will be much easier to modify files and start new terminals. You will need to install the “Remote SSH” and “Remote Explorer” extensions then add the VM hosts by editing the **ssh config** to add the host and include the IdentifyFile parameter as seen below. Then back in VsCode, refresh the list of hosts, connect, follow the prompts to continue and open the ***/home/ubuntu*** folder.
 
 ![remote](../Docs/images/lab-01/image-1.png)
 
@@ -32,22 +30,31 @@ Optionally, you can set this up in Visual Studio Code. It will be much easier to
 
 ![alt text](../Docs/images/lab-01/lab1-19.png)
 
-Example SSH command for Windows:
 
-`
-ssh -i C:\\Users\\USER\\Downloads\\ENA8FWiOpusuWSA3PIMPcocw2_aws_rsa ubuntu@SERVERIP
-`
+- **docker** must be installed and ready. Check docker version and service status on both VM1 and VM2. CTRL+C to exit.
 
-Example SSH command for Mac or Linux:
+```Shell
+docker version && sudo systemctl status docker
+```
+![alt text](../Docs/images/lab-01/lab1-20.png)
 
-`
-ssh -i /home/USER/Downloads/ENA8FWiOpusuWSA3PIMPcocw2_aws_rsa ubuntu@SERVERIP
-`
+- Install snappi on VM1 (controller host).
+
+```Shell
+python3 -m pip install --upgrade snappi --break-system-packages
+```
+- Clone the git repository associated with this workshop on VM1.
+
+```Shell
+git clone https://github.com/open-traffic-generator/ac4-workshop.git
+```
+
+
 
 ## Execution
 ### Part 1
 
-- Let's pull the docker images needed for this lab
+- Let's pull the docker images needed for this lab. Go to both VM1 and VM2 terminals and run the commands below.
 
 ```Shell
 docker pull ghcr.io/open-traffic-generator/keng-controller:1.40.0-15
