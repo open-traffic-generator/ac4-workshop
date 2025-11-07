@@ -15,7 +15,6 @@ Labs
 - [Lab-03. KENG in CLOS](./lab-03/README.md)
 - [Lab-04. KENG in Kubernetes](./lab-04/README.md)
 - [Lab-05. Cyperf-CE between 2 servers](./lab-05/README.md)
-- [Lab-06. Cyperf-CE production test](./lab-06/README.md)
 
 A good reference on OTG / KENG could be found here [ac2 workshop](https://github.com/open-traffic-generator/ac2-workshop) with similar lab exercises.
 
