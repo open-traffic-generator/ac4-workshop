@@ -2,7 +2,7 @@
 
 ## Why Traditional Tools Fall Short in Modern Networks
 
-![Network Evolution](../Docs/images/lab-05/Lab5-12.png)
+![Network Evolution](../Docs/images/lab-05/lab5-12.png)
 
 ### The Core Problem: Your Network Isn't Just a Pipe
 
