@@ -31,7 +31,7 @@ ssh -i /home/USER/Downloads/ENA8FWiOpusuWSA3PIMPcocw2_aws_rsa ubuntu@VM_EXTERNAL
 ![alt text](../Docs/images/lab-01/lab1-19.png)
 
 
-- **docker** must be installed and ready. Check docker version and service status on both VM1 and VM2. CTRL+C to exit.
+- **docker** must be installed and ready. Check docker version and status on both VM1 and VM2. CTRL+C to exit.
 
 ```Shell
 docker version && sudo systemctl status docker
