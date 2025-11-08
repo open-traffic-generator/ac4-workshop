@@ -9,7 +9,7 @@ This repository contains NAF Autocon4 workshop materials. Each lab has its own i
 Here are the important materials that you will need to refer to during the lab exercises.
 * [Overview presentation of OTG concepts](./Docs/AC4-WSA4.pdf)
 * [Overview of Cyperf-CE concepts](https://www.cyperf.com/)
-* [FAQ document](./Docs/Autocon4_WSA4_Pre-workshop%20FAQ.md)
+* [FAQ document](./Docs/NAF_AUTOCON4_WS_AS4_FAQ_.pdf)
 
 
 Labs
