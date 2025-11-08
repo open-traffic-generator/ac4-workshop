@@ -49,7 +49,7 @@ iPerf measures bandwidth. It doesn't measure what matters most:
 
 ## CyPerf-CE: The Complete Solution
 
-![CyPerf-CE Advantages](../Docs/images/lab-05/Lab5-11.png)
+![CyPerf-CE Advantages](../Docs/images/lab-05/lab5-11.png)
 
 ### 🎯 Stop Guessing. Start Validating.
 
