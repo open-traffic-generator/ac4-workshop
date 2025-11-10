@@ -16,7 +16,7 @@ The test scripts have been already created and the goal of the lab is to instruc
 ssh -i C:\\Users\\USER\\Downloads\\ENA8FWiOpusuWSA3PIMPcocw2_aws_rsa ubuntu@VM_EXTERNAL_IP
 `
 
-- SSH command example below for Linux / MacOS terminal.
+- SSH command example below for Linux / MacOS terminal. For MAC you may have to set the permission of the private key first using `chmod 600 /path/to/keyfile`
 
 `
 ssh -i /home/USER/Downloads/ENA8FWiOpusuWSA3PIMPcocw2_aws_rsa ubuntu@VM_EXTERNAL_IP
@@ -43,7 +43,7 @@ docker version && sudo systemctl status docker
 ```Shell
 python3 -m pip install --upgrade snappi --break-system-packages
 ```
-- Clone the git repository associated with this workshop on VM1.
+- Clone the git repository associated with this workshop on VM1 and VM2.
 
 ```Shell
 git clone https://github.com/open-traffic-generator/ac4-workshop.git
@@ -164,12 +164,12 @@ docker ps
 docker logs lab-01-traffic_engine-1
 ```
 
-- You can check the ***Interface ens6 found*** log on both VMs to ensure the traffic engine is ready.
+- You can check the ***Interface ens6 found*** entry in the logs on both VMs, to ensure the traffic engine is ready.
 
 ![alt text](../Docs/images/lab-01/lab1-12.png)
 
 - Let's open the script **lab-01-part2.py** and make the changes to match the interface information: management IP, test IP and MAC address. You can use `arp` and `ip address` commands to retrieve these.
-Because we're now using the protocol engine, this must be specified in the port "location" attribute. Unlike the traffic engine where the port can be changed, the protocol engine will always be "listening" on port 50071.
+Because we're now using the protocol engine, this must be specified in the port "location" attribute. Unlike the traffic engine where the port can be changed, the protocol engine will always be "listening" on port 50071. Also don't forget to set controller location.
 
 ![alt text](../Docs/images/lab-01/lab1-13.png)
 

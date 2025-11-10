@@ -96,11 +96,8 @@ kubectl get services -n ixia-c-ceos
 ```
 ![alt text](../Docs/images/lab-04/lab4-3.png)
 
-- You can ssh into the **dut** pod using the dut IP address `ssh admin@172.18.0.55` (password: "admin") or you can exec into the pod using kubectl as shown below and inspect the running configuration.
+- You can ssh into the **dut** pod using the dut IP address `ssh admin@172.18.0.55` (password: "admin") or you can exec into the pod using kubectl as show here `kubectl exec -it -n ixia-c-ceos dut -- Cli` and inspect the running configuration.
 
-```Shell
-kubectl exec -it -n ixia-c-ceos dut -- Cli
-```
 ```Shell
 enable
 show running-config
@@ -169,11 +166,8 @@ go test -v feature/bgp/addpath/otg_tests/route_propagation_test/route_propagatio
 
 ![alt text](../Docs/images/lab-04/lab4-10.png)
 
-- You can inspect the dut configuration again to see the changes applied by the featureprofiles test.
+- You can inspect the dut configuration again to see the changes applied by the featureprofiles test. You can ssh into the **dut** pod using the dut IP address `ssh admin@172.18.0.55` (password: "admin") or you can exec into the pod using kubectl as show here `kubectl exec -it -n ixia-c-ceos dut -- Cli`
 
-```Shell
-kubectl exec -it -n ixia-c-ceos dut -- Cli
-```
 ```Shell
 enable
 show running-config
@@ -182,8 +176,9 @@ show running-config
 
 ## Cleanup
 
-- We delete the cluster using the command below. 
+- We delete the kne topology then we delete the k8s cluster.
 
 ```Shell
+kne delete ixia-c-ceos.textproto
 kind delete cluster --name kne
 ```

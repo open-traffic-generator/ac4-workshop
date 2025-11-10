@@ -30,7 +30,7 @@ python3 -m pip install --upgrade snappi --break-system-packages
 
 ## Execution
 
-Observe the containerlab topology file. Notice the parameters are the same as those used in the previous lab.
+Observe the containerlab topology file **lab-02.clab.yml**. Notice the parameters are the same as those used in the previous lab.
 
 ![alt text](../Docs/images/lab-02/lab2-3.png)
 
@@ -92,9 +92,10 @@ There was packet loss during the link down event. The convergence time is displa
 python3 lab-02.py
 ```
 
-- While the traffic is running, in a separate terminal we want to interact with the controller by sending a BGP route withdraw by passing a the **body-withdraw.json** file to the rest request.
+- While the traffic is running, in a separate terminal we want to interact with the controller by sending a BGP route withdraw by passing the **body-withdraw.json** file to the rest request.
 
 ```Shell
+cd ~/ac4-workshop/lab-02/
 curl -k -X POST https://clab-lab-02-controller:8443/control/state -d @body-withdraw.json
 ```
 
@@ -105,6 +106,7 @@ curl -k -X POST https://clab-lab-02-controller:8443/control/state -d @body-withd
 - Let's readvertise the routes now by passing the **body-advertise.json** file.
 
 ```Shell
+cd ~/ac4-workshop/lab-02/
 curl -k -X POST https://clab-lab-02-controller:8443/control/state -d @body-advertise.json
 ```
 
@@ -113,8 +115,10 @@ curl -k -X POST https://clab-lab-02-controller:8443/control/state -d @body-adver
 ![alt text](../Docs/images/lab-02/lab2-13.png)
 
 
-- Let's manually stop the traffic by passing the **body-stop-traffic.json** file.
+- Let's manually stop the traffic by passing the **body-stop-traffic.json** file. Then we can observe the traffic stats ideally with no packet loss. You can stop the script now with Ctrl+C.
+
 ```Shell
+cd ~/ac4-workshop/lab-02/
 curl -k -X POST https://clab-lab-02-controller:8443/control/state -d @body-stop-traffic.json
 ```
 
