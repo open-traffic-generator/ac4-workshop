@@ -1,40 +1,34 @@
 # Lab 05 Instructions
 
-## Background
-
-![alt text](../Docs/images/lab-05/overview.png)
-
-Acme Corporation operates a diverse IT environment, encompassing Software-Defined Data Center (SDDC), cloud infrastructure, and on-premises data center deployments. To ensure seamless service delivery to end customers, Acme must deploy its services in a distributed manner. These services may run within a single type of infrastructure or span across all three environments.
-
-A key characteristic of these services in todays's era of modern, cloud-native architectures built on microservices is their need to support a large number of simultaneous user connections and frequent, lightweight transactions—such as chat messages or API calls.
-
-
 ## Lab Objective
 
 
-To deploy [**CyPerfCE**](https://www.cyperf.com/) VM's and run a stateful connection and transaction rate test to stress the network's compute and packet-per-second capacity. We would be looking at Connections Per Second as our KPI.
+To deploy [**CyPerfCE**](https://www.cyperf.com/) VM's and run a stateful connection and transaction rate test to stress the network's compute and packet-per-second capacity. 
+We would be looking at Connections Per Second as our KPI.
 
 ## Hardware Requirements
 
-We will only require 2 VMs for this lab. One as cyperf-ce server and other as cyperf-ce client. 
+We will require 2 VMs for this lab to act as server agent and client agent. These VM's have been spun up as part of your lab environment. 
 
+```
+> VM2 as cyperf-ce server
+
+> VM1 as cyperf-ce client
+```
 Deployment and logical topology below.
 
 ![alt text](../Docs/images/lab-05/lab5-1.png)
 
 ## Prerequisites
 
-- Two networked systems (Virtual Machines or Containers) capable of communicating with each other.
-
-- CyPerf Community Edition installed on both systems.
-
-- The IP address of the system that will act as the Server.
+- Two networked systems (Virtual Machines or Containers) capable of communicating with each other - Cyperf-CE server(VM2) and other as cyperf-CE client (VM1)
+- CyPerf Community Edition installed on both systems. Explained further in "Phase 1"
 
 ## Step-by-Step Procedure
 
 ### Phase 1: Install cyperf-ce module on your Client and Server VM's
 
-- Run the [setup script](setup_cyperf_on_agent.sh).
+- Run the [setup script](setup_cyperf_on_agent.sh) on VM1 and VM2.
 
 ```Shell
 cd ~ac4-workshop/lab-05/
@@ -42,36 +36,37 @@ chmod +x setup_cyperf_on_agent.sh
 ./setup_cyperf_on_agent.sh
 ```
 
-### Phase 2.1: Deploying the Server Agent
+### Phase 2.1: Deploying the Server Agent on VM2
 
-- We will designate VM2 as the "Server" agent, which will passively wait for connection requests from the "Client" agent (VM1).
+- Let us use VM2 as the "Cyperf CE Server" agent, which will passively wait for connection requests from the "Cyperf CE Client" agent (VM1).
 - On VM2 start the server process. 
 
 ***Connection rate test with default limits***
 
 ```bash
-sudo cyperf -s –cps 
+sudo cyperf -s --cps 
 ```
 
 ** Bonus: You can also run connection rate test with custom payload size. 
 
 
 ```bash
-sudo cyperf -s –cps –-length 1k
+sudo cyperf -s --cps –-length 1k
 ```
 
-This cyperf server agent will bind to an IP address and listen for incoming client connections.
+This cyperf server agent will bind to all the IP address on VM2 unless we specify --bind <ip> in the command.  In our lab we will be using 'ens6' - 10.0.2.22 IP as server IP
 
 ** Note this IP address as it would be your server ip address that client will connect to. Let's call it **SERVER_IP_ADDR**.
+
 
 ![alt text](../Docs/images/lab-05/lab5-2.png)
 
 You can explore various options and their explanations at [Cyperf Options](https://github.com/Keysight/cyperf/blob/main/cyperf-ce/OPTIONS.md)
 
 
-### Phase 2.2: Deploying the Client Agent
+### Phase 2.2: Deploying the Client Agent on VM1
 
-- The second step is to use the "Client" agent on VM1 to initiate a stateful connection test against the Server (VM2), targeting a specific Connections Per Second (CPS).
+- The second step is to use the "Cyperf CE Client" agent on VM1 to initiate a stateful connection test against the Server (VM2), targeting a specific Connections Per Second (CPS).
 - On VM1 start the client process with below command. Replace **SERVER_IP_ADDR** with actual server ip address noted in previous step.
 
 ***Connection rate test with target CPS of 1000 connections per second***
