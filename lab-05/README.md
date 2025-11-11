@@ -31,7 +31,7 @@ Deployment and logical topology below.
 - Run the [setup script](setup_cyperf_on_agent.sh) on VM1 and VM2.
 
 ```Shell
-cd ~ac4-workshop/lab-05/
+cd ~/ac4-workshop/lab-05/
 chmod +x setup_cyperf_on_agent.sh
 ./setup_cyperf_on_agent.sh
 ```
@@ -54,7 +54,7 @@ sudo cyperf -s --cps
 sudo cyperf -s --cps –-length 1k
 ```
 
-This cyperf server agent will bind to all the IP address on VM2 unless we specify --bind <ip> in the command.  In our lab we will be using 'ens6' - 10.0.2.22 IP as server IP
+This cyperf server agent will bind to all the IP address on VM2 unless we specify --bind <ip> in the command.  In our lab we will be using 'ens6' - 10.0.2.22 as server IP
 
 ** Note this IP address as it would be your server ip address that client will connect to. Let's call it **SERVER_IP_ADDR**.
 
@@ -69,16 +69,22 @@ You can explore various options and their explanations at [Cyperf Options](https
 - The second step is to use the "Cyperf CE Client" agent on VM1 to initiate a stateful connection test against the Server (VM2), targeting a specific Connections Per Second (CPS).
 - On VM1 start the client process with below command. Replace **SERVER_IP_ADDR** with actual server ip address noted in previous step.
 
+For our lab it is 'ens6' - 10.0.2.12 on VM1
+
 ***Connection rate test with target CPS of 1000 connections per second***
 
 ```bash
 sudo cyperf -c SERVER_IP_ADDR --cps 1000
+
+>> sudo cyperf -c 10.0.2.22 --cps 1000
 ```
 
 ** Bonus: Along with the CPS goal you can also set the packet size for CPS test. Smaller packets get you better CPS results.
 
 ```bash
-sudo cyperf -s --cps 10k/s --length 1
+sudo cyperf -c SERVER_IP_ADDR --cps 10k/s --length 1
+
+>> sudo cyperf -c 10.0.2.22 --cps 10k/s --length 1
 ```
 
 See trace as below on you Client VM.
@@ -214,7 +220,7 @@ Want to push your network to its absolute limits? In this **BONUS LAB**, we'll s
 
 ### How to Run a Throughput Test
 
-#### 1. **Start the Server**
+#### Phase 1.1. **Deploying the Server Agent on VM2**
 
 SSH into your **server VM** and start the server to listen for throughput tests:
 
@@ -223,12 +229,14 @@ sudo cyperf -s
 ```
 Note <SERVER_IP_ADDR> to be used with client agent in next step.
 
-#### 2. **Start the Client in Throughput Mode**
+#### Phase 1.2. **Deploying the Client Agent on VM1**
 
 SSH into the **client VM** and run the following command, replacing `<SERVER_IP_ADDR>` with your server's actual IP address:
 
 ```bash
 sudo cyperf -c <SERVER_IP_ADDR> -b <target_throughput>
+
+>> sudo cyperf -c 10.0.2.22 -b 5G/s
 ```
 
 ```bash
@@ -244,7 +252,7 @@ This option cannot be used with --cps option.
 
 You can add additional optional arguments, such as:
 
-- `--duration 60`  (Run the test for 60 seconds)
+- `--time 60`  (Run the test for 60 seconds)
 - `--length 1400`  (Use 1400-byte packets)
 
 #### 4. **Read the Output**
