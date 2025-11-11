@@ -10,11 +10,11 @@ We would be looking at Connections Per Second as our KPI.
 
 We will require 2 VMs for this lab to act as server agent and client agent. These VM's have been spun up as part of your lab environment. 
 
-```
-> VM2 as cyperf-ce server
 
-> VM1 as cyperf-ce client
-```
+- VM2 as cyperf-ce server
+
+- VM1 as cyperf-ce client
+
 Deployment and logical topology below.
 
 ![alt text](../Docs/images/lab-05/lab5-1.png)
@@ -71,20 +71,28 @@ You can explore various options and their explanations at [Cyperf Options](https
 
 For our lab it is 'ens6' - 10.0.2.12 on VM1
 
+If multiple interfaces on client VM, you can chosse the interface to use to send traffic to server using '--bind' option. By default, cyperf will select the required IP address and interface from linux route table.
+
 ***Connection rate test with target CPS of 1000 connections per second***
 
-```bash
+`
 sudo cyperf -c SERVER_IP_ADDR --cps 1000
+`
 
->> sudo cyperf -c 10.0.2.22 --cps 1000
+For this lab:
+```bash
+sudo cyperf -c 10.0.2.22 --cps 1000
 ```
 
 ** Bonus: Along with the CPS goal you can also set the packet size for CPS test. Smaller packets get you better CPS results.
 
-```bash
+`
 sudo cyperf -c SERVER_IP_ADDR --cps 10k/s --length 1
+`
 
->> sudo cyperf -c 10.0.2.22 --cps 10k/s --length 1
+For this lab:
+```bash
+sudo cyperf -c 10.0.2.22 --cps 10k/s --length 1
 ```
 
 See trace as below on you Client VM.
@@ -233,10 +241,13 @@ Note <SERVER_IP_ADDR> to be used with client agent in next step.
 
 SSH into the **client VM** and run the following command, replacing `<SERVER_IP_ADDR>` with your server's actual IP address:
 
-```bash
+`
 sudo cyperf -c <SERVER_IP_ADDR> -b <target_throughput>
+`
 
->> sudo cyperf -c 10.0.2.22 -b 5G/s
+For this lab:
+```bash
+sudo cyperf -c 10.0.2.22 -b 5G/s
 ```
 
 ```bash
