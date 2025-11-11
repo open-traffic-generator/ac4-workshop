@@ -26,7 +26,7 @@ Deployment and logical topology below.
 
 - Two networked systems (Virtual Machines or Containers) capable of communicating with each other.
 
-- CyPerf Community Edition installed on both systems (the video demonstrates a Docker deployment for one side.
+- CyPerf Community Edition installed on both systems.
 
 - The IP address of the system that will act as the Server.
 
@@ -34,15 +34,21 @@ Deployment and logical topology below.
 
 ### Phase 1: Install cyperf-ce module on your Client and Server VM's
 
-- Follow the installation instructions provided in this [setup script](setup_cyperf_on_agent.sh).
+- Run the [setup script](setup_cyperf_on_agent.sh).
 
-### Phase 2: Deploying the Server Agent
+```Shell
+cd ~ac4-workshop/lab-05/
+chmod +x setup_cyperf_on_agent.sh
+./setup_cyperf_on_agent.sh
+```
 
-- The first step is to designate one of your VM as the "Server" agent, which will passively wait for connection requests from the "Client" agent.
+### Phase 2.1: Deploying the Server Agent
 
-- SSH into the Server VM and start the server process. 
+- We will designate VM2 as the "Server" agent, which will passively wait for connection requests from the "Client" agent (VM1).
+- On VM2 start the server process. 
 
-Connection rate test with default limits. 
+***Connection rate test with default limits***
+
 ```bash
 sudo cyperf -s –cps 
 ```
@@ -56,22 +62,19 @@ sudo cyperf -s –cps –-length 1k
 
 This cyperf server agent will bind to an IP address and listen for incoming client connections.
 
-** Note this IP address as it would be your server ip address that client will connect to. Let's call it SERVER_IP_ADDR
-
-You should see a trace like below on your VM
+** Note this IP address as it would be your server ip address that client will connect to. Let's call it **SERVER_IP_ADDR**.
 
 ![alt text](../Docs/images/lab-05/lab5-2.png)
 
-Please explore various options and their explanations at [OPTIONS.md])(https://github.com/Keysight/cyperf/blob/main/cyperf-ce/OPTIONS.md)
+You can explore various options and their explanations at [Cyperf Options](https://github.com/Keysight/cyperf/blob/main/cyperf-ce/OPTIONS.md)
 
 
-### Phase 2: Deploying the Client Agent
+### Phase 2.2: Deploying the Client Agent
 
-- The second step is to use the "Client" agent on VM you have designated and Client VM to initiate a stateful connection test against the Server, targeting a specific Connections Per Second (CPS).
+- The second step is to use the "Client" agent on VM1 to initiate a stateful connection test against the Server (VM2), targeting a specific Connections Per Second (CPS).
+- On VM1 start the client process with below command. Replace **SERVER_IP_ADDR** with actual server ip address noted in previous step.
 
-- SSH into the Client VM and run the client process. 
-
-Connection rate test with target CPS of 1000 connections per second
+***Connection rate test with target CPS of 1000 connections per second***
 
 ```bash
 sudo cyperf -c SERVER_IP_ADDR --cps 1000
@@ -86,8 +89,6 @@ sudo cyperf -s --cps 10k/s --length 1
 See trace as below on you Client VM.
 
 ![alt text](../Docs/images/lab-05/lab5-4.png)
-
-### Phase 2.1:
 
 
 ### Phase 3: Statistics Analysis
