@@ -2,6 +2,7 @@
 
 ## Overview
 In this lab we're going to use [**Cyperf**](https://www.keysight.com/us/en/products/network-test/cloud-test/cyperf.html) to generate http traffic between 2 cloud VMs (Cyperf Agents).
+The goal of the lab is to get familiar with Cyperf architecture and how to deploy Cyperf agents using docker containers. We will also create simple tests to generate mixed traffic between the 2 agents and monitor the traffic using the Cyperf controller UI.
 
 
 ## Prerequisites
@@ -68,16 +69,21 @@ In this case, we will be using **ens6** IP address.
 
 - Log in using the default credentials: Username: `your email address` Password: `Ixia123!`
 
-- After logging in, you’ll see a preconfigured “HTTP Basic Test” test session. Click to open it. 
+- After logging in, you’ll see a preconfigured “lab-06-test” test session. The objective of this test is to generate 100 connections per second using simple HTTP traffic. Click to open it. 
 
 ![alt text](../Docs/images/lab-06/lab6-2.png)
 
-- Add Agents. In the test view, locate the exclamation marks beside the agent slots. Click them to add agents.
+- Then we go to the "ENTERPRISEMIX" section.
 
 ![alt text](../Docs/images/lab-06/lab6-3.png)
 
+- In the test view, locate the exclamation marks beside the agent slots. Click on them to add agents.
+- On the left-hand side, assign the client's port icon.
+- You need to find and assign agents. A search by IP Address will ensure that we won't use someone else's agents. In my case `172.21.6`.
 
-- On the left-hand side, assign the client IP. You should find 2 addresses `172.21.X.4` and `172.21.X.5`, where **X** is your assigned student number. In my example I used 172.18.0.4 while deploying the client docker agent. In your case it should be `172.21.X.4`. Select that and click Update.
+![alt text](../Docs/images/lab-06/lab6-10.png)
+
+- You should find 2 addresses `172.21.X.4` and `172.21.X.5`, where **X** is your assigned student number. In my example I used 172.21.6.4 while deploying the client docker agent. In your case it should be `172.21.X.4`. Select that and click Update.
 
 ![alt text](../Docs/images/lab-06/lab6-4.png)
 
@@ -101,9 +107,35 @@ In this case, we will be using **ens6** IP address.
 
 ![alt text](../Docs/images/lab-06/lab6-9.png)
 
-Your **Cyperf** environment is now configured and ready for traffic validation. You can repeat tests with varying profiles, scale factors, or protocols depending on your learning objectives. 
-1)	Change and add more applications
-2)	Add a security configuration
+
+- We can now make some changes to the test objective for testing throughput and to include more applications to our mix of traffic. Click on top-right **Overview** to go back to the test configuration page, then edit the **Objectives & Timeline** section.
+
+![alt text](../Docs/images/lab-06/lab6-12.png)
+
+- Set the **Primary Objective** to **Throughput** and set the value to **100 Mbps** with a duration of **60** seconds. 
+
+![alt text](../Docs/images/lab-06/lab6-13.png)
+
+
+- Then click on **Applications** to add activate all applications of the mix.
+
+![alt text](../Docs/images/lab-06/lab6-14.png)
+
+- Restart the test by clicking on **START TEST** (blue play icon) to initiate the test and observe the new metrics.
+
+![alt text](../Docs/images/lab-06/lab6-15.png)
+
+- We can now enable the **ATTACK PROFILE** to simulate some DDoS traffic. Go back to the **Overview** page and then click on the **TEST SETTINGS** section. We're adding 2 attack profiles: **Critical Strikes** and **All Dan Gemini AI LLM Prompt Injection**. 
+
+![alt text](../Docs/images/lab-06/lab6-16.png)
+
+- More on the attack profiles can be found if you go and edit the **ATTACK PROFILE** section. There you can find a description for each strike. These attacks will be added to the existing traffic mix. 
+
+![alt text](../Docs/images/lab-06/lab6-17.png)
+
+- Restart the test by clicking on **START TEST** to initiate the test and observe the new metrics.
+
+![alt text](../Docs/images/lab-06/lab6-18.png)
 
 
 ## Cleanup
