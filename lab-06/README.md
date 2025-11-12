@@ -108,6 +108,8 @@ Your **Cyperf** environment is now configured and ready for traffic validation. 
 
 ## Cleanup
 
+On both VMs, run the commands below to remove the containers and the docker network.
+
 ```Shell
 docker stop $(docker ps -aq) && docker rm $(docker ps -aq)
 docker network rm cyperf_mgmt_net 
