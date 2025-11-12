@@ -23,7 +23,12 @@ docker network create --subnet=172.21.x.0/24 cyperf_mgmt_net
 - Deploy the Client Agent. The CyPerf agent image may take a little while to download. Deploy the client using the command below.
 
 ```Shell
-docker run -td --cap-add=NET_ADMIN --cap-add=IPC_LOCK --network cyperf_mgmt_net --ip=172.21.6.4 --name john-client -e AGENT_CONTROLLER=CONTROLLER_ADDRESS -e AGENT_TAGS=john-client  public.ecr.aws/keysight/cyperf-agent:latest
+docker run -td --cap-add=NET_ADMIN --cap-add=IPC_LOCK \
+--network cyperf_mgmt_net --ip=172.21.6.4 \
+--name john-client                        \
+-e AGENT_CONTROLLER=CONTROLLER_ADDRESS    \
+-e AGENT_TAGS=john-client                 \
+public.ecr.aws/keysight/cyperf-agent:latest
 ```
 
 ## Server Configuration
@@ -44,7 +49,13 @@ docker network create --subnet=172.21.x.0/24 cyperf_mgmt_net
 - Deploy the Server Agent. The CyPerf agent image may take a little while to download. Deploy the server using the command below.
 
 ```Shell
-sudo docker run -td --cap-add=NET_ADMIN --cap-add=IPC_LOCK --network cyperf_mgmt_net --ip=172.21.6.5 --name john-server -e AGENT_CONTROLLER=CONTROLLER_ADDRESS -e AGENT_TAGS=john-server -p 80:80 public.ecr.aws/keysight/cyperf-agent:latest
+sudo docker run -td --cap-add=NET_ADMIN --cap-add=IPC_LOCK \
+--network cyperf_mgmt_net --ip=172.21.6.5                  \
+--name john-server                                         \
+-e AGENT_CONTROLLER=CONTROLLER_ADDRESS                     \
+-e AGENT_TAGS=john-server                                  \
+-p 80:80                                                   \
+public.ecr.aws/keysight/cyperf-agent:latest
 ```
 - Note your VM’s interface IP, retrievable via `ip addr` or `ifconfig`. This will serve as your Device Under Test(DUT) IP in the test as the docker client agent that we deployed earlier will send the traffic to this IP. This will internally get routed to the docker server we just deployed.
 In this case, we will be using **ens6** IP address.
@@ -99,4 +110,5 @@ Your **Cyperf** environment is now configured and ready for traffic validation. 
 
 ```Shell
 docker stop $(docker ps -aq) && docker rm $(docker ps -aq)
+docker network rm cyperf_mgmt_net 
 ```
