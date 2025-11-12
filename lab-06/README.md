@@ -117,7 +117,7 @@ In this case, we will be using **ens6** IP address.
 ![alt text](../Docs/images/lab-06/lab6-13.png)
 
 
-- Then click on **Applications** to add activate all applications of the mix.
+- Then click on **Applications** to activate all applications of the mix.
 
 ![alt text](../Docs/images/lab-06/lab6-14.png)
 
