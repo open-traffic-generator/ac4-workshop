@@ -9,6 +9,7 @@ This repository contains NAF Autocon4 workshop materials. Each lab has its own i
 Here are the important materials that you will need to refer to during the lab exercises.
 * [Overview presentation of OTG concepts](./Docs/AC4-WSA4.pdf)
 * [Overview of Cyperf-CE concepts](https://www.cyperf.com/)
+* [Overview of Cyperf concepts](https://www.keysight.com/us/en/products/network-test/cloud-test/cyperf.html)
 * [FAQ document](./Docs/NAF_AUTOCON4_WS_AS4_FAQ_.pdf)
 
 
@@ -18,6 +19,7 @@ Labs
 - [Lab-03. KENG in CLOS](./lab-03/README.md)
 - [Lab-04. KENG in Kubernetes](./lab-04/README.md)
 - [Lab-05. Cyperf-CE between 2 servers](./lab-05/README.md)
+- [Lab-05. Cyperf between 2 agents](./lab-06/README.md)
 
 A good reference on OTG / KENG could be found here [ac2 workshop](https://github.com/open-traffic-generator/ac2-workshop) with similar lab exercises.
 
