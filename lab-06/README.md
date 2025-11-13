@@ -129,7 +129,7 @@ In this case, we will be using **ens6** IP address.
 
 ![alt text](../Docs/images/lab-06/lab6-16.png)
 
-- More on the attack profiles can be found if you go and edit the **ATTACK PROFILE** section. There you can find a description for each strike. These attacks will be added to the existing traffic mix. 
+- More info on the attack profiles can be found if you go and edit the **ATTACK PROFILE** section or in the Cyper [**User Guide**](https://downloads.ixiacom.com/support/downloads_and_updates/public/KeysightCyPerf/releases/7.0/Keysight_CyPerf_7.0_ATI_ReleaseNotes.pdf). There you can find a description for each strike. These attacks will now be added to the existing traffic mix. 
 
 ![alt text](../Docs/images/lab-06/lab6-17.png)
 
