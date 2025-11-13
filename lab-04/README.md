@@ -174,11 +174,31 @@ show running-config
 ```
 
 
+### Bonus test
+
+- Run the script lab-04-as-lab-02.py to calculate BGP convergence time in **ixia-c-ceos-bgp.textproto** topology. This is similar to lab-02 but this time we are using otg over kne/k8s.
+- Deploy the topology.
+
+```Shell
+kne create ixia-c-ceos-bgp.textproto
+```
+
+- Update ***lab-04-as-lab-02.py*** with the correct controller address and ports location. You need to find the controller external IP address and the dut IP address from the k8s services list by using `kubectl get services -n ixia-c-ceos-bgp`
+
+```Shell
+python3 lab-04-as-lab-02.py
+```
+
+- Destroy the topology.
+
+```Shell
+kne delete ixia-c-ceos-bgp.textproto
+```
+
 ## Cleanup
 
 - We delete the kne topology then we delete the k8s cluster.
 
 ```Shell
-kne delete ixia-c-ceos.textproto
 kind delete cluster --name kne
 ```
