@@ -1,0 +1,80 @@
+# proto-file: github.com/openconfig/kne/proto/topo.proto
+# proto-message: Topology
+name: "ixia-c-ceos-bgp"
+nodes: {
+    name: "dut"
+    vendor: ARISTA
+    model: "ceos"
+    os: "eos"
+    config: {
+        image: "ceos:4.35.0"
+        file: "ceos-bgp.cfg"
+        config_path: "/mnt/flash"
+        config_file: "startup-config"
+        cert: {
+            self_signed: {
+                cert_name: "gnmiCert.pem"
+                key_name: "gnmiCertKey.pem"
+                key_size: 4096
+            }
+        }
+    }
+    services: {
+        key: 22
+        value: {
+            name: "ssh"
+            inside: 22
+        }
+    }
+    services: {
+        key: 443
+        value: {
+            name: "ssl"
+            inside: 443
+        }
+    }
+    services: {
+        key: 9339
+        value: {
+            name: "gnmi"
+            inside: 9339
+        }
+    }
+    services: {
+        key: 9340
+        value: {
+            name: "gribi"
+            inside: 9340
+        }
+    }
+    services: {
+        key: 9559
+        value: {
+            name: "p4rt"
+            inside: 9559
+        }
+    }
+}
+nodes: {
+    name: "otg"
+    vendor: KEYSIGHT
+    version: "1.40.0-15"
+}
+links: {
+    a_node: "otg"
+    a_int: "eth1"
+    z_node: "dut"
+    z_int: "eth1"
+}
+links: {
+    a_node: "otg"
+    a_int: "eth2"
+    z_node: "dut"
+    z_int: "eth2"
+}
+links: {
+    a_node: "otg"
+    a_int: "eth3"
+    z_node: "dut"
+    z_int: "eth3"
+}
