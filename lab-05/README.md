@@ -122,77 +122,42 @@ You will be able to see the test run summary snapshot of Connections Per Second(
 ![alt text](../Docs/images/lab-05/lab5-5.png)
 
 
-### Phase 5: Other useful options when running cyperf - ce tests.
+### Phase 5: Other useful options when running cyperf-ce tests.
 
 All the below options are to be used client side VM before running the test. 
 If we need a flag to be added on server side VM as well, it will be specified in command help
 
-```
---parallel / -P  <Number of parallel client sessions to run>
 
-Tuning this option can help in improving bitrate and connection rate.
-Default: Number of available CPU cores.
-Max: 64000
-```
+**--parallel / -P**  *Number of parallel client sessions to run. Tuning this option can help in improving bitrate and connection rate. Default: Number of available CPU cores. Max: 64000*
 
 ![alt text](../Docs/images/lab-05/lab5-6.png)
 
-```
---bind  <interface ip>
+**--bind  'interface ip'** *Bind to the interface associated with the IP address . If multiple interfaces on client VM, you can chosse the interface to use to send traffic to server.
+Default: Cyperf will select the required IP address and interface from linux route table.*
 
-
-Bind to the interface associated with the IP address . If multiple interfaces on client VM, you can chosse the interface to use to send traffic to server.
-Default: Cyperf will select the required IP address and interface from linux route table.
-```
-
-```
-
---port
-
-Server will listen on the specified port.
+**--port**  *Server will listen on the specified port.
 Client will connect to the specified port.
-Default: 5201
-```
+Default: 5201*
 
-```
---file <filepath>
-
-Transmit / receive the specified file.
+**--file 'filepath'**  *Transmit / receive the specified file.
 cyper will attempt to use this file as a single block to read and write repeatedly. The file needs to exist in the specified path, cannot be empty and cannot be more than 128 megabytes in size.
 If this option is used, it must be used in both server and client commands.
-This option cannot be used together with -l / --length option.
-```
+This option cannot be used together with -l / --length option.*
 
-```
 
---bidir 
-
-In this mode both client and server send and receive data simultaneously.
+**--bidir** *In this mode both client and server send and receive data simultaneously.
 If this option is used, it must be used in both server and client commands.
-This option cannot be used together with -R / --reverse option.
+This option cannot be used together with -R / --reverse option.*
 
 
---reverse
-
-In this mode, server sends and client receives the data.
+**--reverse**  *In this mode, server sends and client receives the data.
 If this option is used, it must be used in both server and client commands.
-This option cannot be used together with --bidir option
+This option cannot be used together with --bidir option*
 
-```
+**--csv-stats 'filepath'**  *Write all stats to specified csv file. The stats are stored at times as specified by '--interval'*
 
-``` 
---csv-stats <filepath>
+**--detailed-stats** *Show more detailed stats in console. This option can be used to show more detailed stats like ARP stats, ethernet and IP level packet stats and TCP stats.*
 
-
-Write all stats to specified csv file. The stats are stored at times as specified by  "--interval" 
-```
-
-```
-
---detailed-stats
-Show more detailed stats in console.
-This option can be used to show more detailed stats like ARP stats, ethernet and IP level packet stats and TCP stats.
-```
 ![alt text](../Docs/images/lab-05/lab5-7.png)
 
 
