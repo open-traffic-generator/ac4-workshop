@@ -121,7 +121,7 @@ In this case, we will be using **ens6** IP address.
 
 ![alt text](../Docs/images/lab-06/lab6-14.png)
 
-- Restart the test by clicking on **START TEST** (blue play icon) to initiate the test and observe the new metrics. In the Statistics, on the left hand side selection panel, click on the **Client Application Profile" to see the breakdown of the traffic per application.
+- Restart the test by clicking on **START TEST** (blue play icon) to initiate the test and observe the new metrics. In the Statistics, on the left hand side selection panel, click on the **Client Application Profile** to see the breakdown of the traffic per application.
 
 ![alt text](../Docs/images/lab-06/lab6-15.png)
 

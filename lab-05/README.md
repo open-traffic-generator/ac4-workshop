@@ -127,7 +127,7 @@ You will be able to see the test run summary snapshot of Connections Per Second(
 All the below options are to be used client side VM before running the test. 
 If we need a flag to be added on server side VM as well, it will be specified in command help
 
-``` bash
+```
 --parallel / -P  <Number of parallel client sessions to run>
 
 Tuning this option can help in improving bitrate and connection rate.
@@ -137,7 +137,7 @@ Max: 64000
 
 ![alt text](../Docs/images/lab-05/lab5-6.png)
 
-```bash
+```
 --bind  <interface ip>
 
 
@@ -145,7 +145,7 @@ Bind to the interface associated with the IP address . If multiple interfaces on
 Default: Cyperf will select the required IP address and interface from linux route table.
 ```
 
-```bash
+```
 
 --port
 
@@ -154,7 +154,7 @@ Client will connect to the specified port.
 Default: 5201
 ```
 
-```bash
+```
 --file <filepath>
 
 Transmit / receive the specified file.
@@ -163,7 +163,7 @@ If this option is used, it must be used in both server and client commands.
 This option cannot be used together with -l / --length option.
 ```
 
-```bash
+```
 
 --bidir 
 
@@ -180,14 +180,14 @@ This option cannot be used together with --bidir option
 
 ```
 
-``` bash
+``` 
 --csv-stats <filepath>
 
 
 Write all stats to specified csv file. The stats are stored at times as specified by  "--interval" 
 ```
 
-```bash
+```
 
 --detailed-stats
 Show more detailed stats in console.
@@ -197,7 +197,7 @@ This option can be used to show more detailed stats like ARP stats, ethernet and
 
 
 ### Phase 6: Cleanup
-On your server VM, Ctrl+C the Server to stop it 
+On your server VM, Ctrl+C the Server to stop it.
 
 ### Conclusion
 
