@@ -103,7 +103,7 @@ In this case, we will be using **ens6** IP address.
 
 ![alt text](../Docs/images/lab-06/lab6-8.png)
 
-- Once the test begins, navigate to the Statistics tab. Monitor live test metrics such as throughput, latency, connection count, and success/failure ratios
+- Once the test begins, navigate to the Statistics tab. Monitor live test metrics such as throughput, latency, connection count, and success/failure ratios. Select various statistics pages from the left panel, to visualize statistics in real-time.
 
 ![alt text](../Docs/images/lab-06/lab6-9.png)
 
@@ -121,16 +121,20 @@ In this case, we will be using **ens6** IP address.
 
 ![alt text](../Docs/images/lab-06/lab6-14.png)
 
-- Restart the test by clicking on **START TEST** (blue play icon) to initiate the test and observe the new metrics.
+- Restart the test by clicking on **START TEST** (blue play icon) to initiate the test and observe the new metrics. In the Statistics, on the left hand side selection panel, click on the **Client Application Profile" to see the breakdown of the traffic per application.
 
 ![alt text](../Docs/images/lab-06/lab6-15.png)
 
-- We can now enable the **ATTACK PROFILE** to simulate some DDoS traffic. Go back to the **Overview** page and then click on the **TEST SETTINGS** section. We're adding 2 attack profiles: **Critical Strikes** and **All Dan Gemini AI LLM Prompt Injection**. 
+- Wait until the test stops.
+
+- We can now enable the **ATTACK PROFILE** to simulate some attacks. 
+- Go back to the **Overview** page and then click on the **TEST SETTINGS** section. We're adding 2 attack profiles: **Critical Strikes** and **All Dan Gemini AI LLM Prompt Injection**. 
 
 ![alt text](../Docs/images/lab-06/lab6-16.png)
 
 - More info on the attack profiles can be found if you go and edit the **ATTACK PROFILE** section or in the Cyper [**User Guide**](https://downloads.ixiacom.com/support/downloads_and_updates/public/KeysightCyPerf/releases/7.0/Keysight_CyPerf_7.0_ATI_ReleaseNotes.pdf). There you can find a description for each strike. These attacks will now be added to the existing traffic mix. 
 
+![alt text](../Docs/images/lab-06/lab6-19.png)
 ![alt text](../Docs/images/lab-06/lab6-17.png)
 
 - Restart the test by clicking on **START TEST** to initiate the test and observe the new metrics.
