@@ -7,7 +7,7 @@ This repository contains NAF Autocon4 workshop materials. Each lab has its own i
 * For all other users: If you have come to this repository outside of the AC4 workshop hours and you do not have an active cloud environment provided for the lab, you can use any Linux instances for OTG labs. For Cyperf Labs you will need to use ONLY Ubuntu/Debian based instances.
 
 Here are the important materials that you will need to refer to during the lab exercises.
-* [WSA4 Presentation](./Docs/AC4-WSA4.pptx)
+* [WS:A4 Presentation](./Docs/AC4-Workshop.pdf)
 * [Overview of Cyperf-CE concepts](https://www.cyperf.com/)
 * [FAQ document](./Docs/NAF_AUTOCON4_WS_AS4_FAQ_.pdf)
 
