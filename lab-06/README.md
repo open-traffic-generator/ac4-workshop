@@ -4,6 +4,8 @@
 In this lab we're going to use [**Cyperf**](https://www.keysight.com/us/en/products/network-test/cloud-test/cyperf.html) to generate http traffic between 2 cloud VMs (Cyperf Agents).
 The goal of the lab is to get familiar with Cyperf architecture and how to deploy Cyperf agents using docker containers. We will also create simple tests to generate mixed traffic between the 2 agents and monitor the traffic using the Cyperf controller UI.
 
+![alt text](../Docs/images/lab-06/lab6-overview.png)
+
 
 ## Prerequisites
 
@@ -99,16 +101,33 @@ In this case, we will be using **ens6** IP address.
 
 ![alt text](../Docs/images/lab-06/lab6-7.png)
 
+### Simple Traffic Test
+
 - Start the Test. Click **START TEST** (blue play icon) to initiate the test.
 
 ![alt text](../Docs/images/lab-06/lab6-8.png)
 
-- Once the test begins, navigate to the Statistics tab. Monitor live test metrics such as throughput, latency, connection count, and success/failure ratios. Select various statistics pages from the left panel, to visualize statistics in real-time.
+- Once the test begins, navigate to the Statistics tab. From here, you can monitor live metrics such as throughput, latency, connection counts, and success/failure ratios. These parameters will help you understand your steady-state theoretical maximum traffic levels and your optimal latency ranges. Since this test uses basic HTTP, it does not fully represent complex real-world Internet traffic patterns, but it provides a solid baseline for your network’s core performance KPIs. We can introduce more realistic behaviors in the next steps.
+
+    A few key KPIs to track during this phase:
+
+    - ***Throughput (Gbps/Mbps)***: Indicates the volume of data successfully transmitted. Helps identify bandwidth ceilings and saturation points.
+    - ***Connection Rate (CPS)***: Shows how quickly the system can establish new connections per second, critical for bursty, high-fanout workloads.
+    - ***Concurrent Connections***: Measures how many active sessions the system can sustain, revealing memory and state-table constraints.
+    - ***Latency Profile***: Includes average time-to-first-byte, time-to-last-byte latencies. These values show how predictable and stable the network is under load.
+    - ***Packet Drops*** / Retransmissions: Highlights congestion, queuing issues, or bottlenecks in the path.
+    - ***Success vs. Failure Ratios***: Helps identify issues such as connection resets, timeouts, or server-side resource exhaustion.
+    By understanding these baseline KPIs, you’ll have a clear foundation to compare against as we introduce more realistic, application-specific traffic patterns in subsequent tests.
 
 ![alt text](../Docs/images/lab-06/lab6-9.png)
 
+### Realistic Traffic Test
 
-- We can now make some changes to the test objective for testing throughput and to include more applications to our mix of traffic. Click on top-right **Overview** to go back to the test configuration page, then edit the **Objectives & Timeline** section.
+- This is the stage where we introduce realism into the test. CyPerf is now emulating actual application behaviors over the network, such as YouTube, O365, Salesforce, Jira, Gmail, and even AI traffic. This is exactly what I was referring to earlier when we discussed adding realistic patterns. You will notice that your KPIs shift significantly, and you can build a similar comparison table to show the impact of real application flows on your baseline metrics.
+
+- CyPerf includes 500+ popular application profiles out of the box, and it also provides an AppBuilder that allows you to create your own custom application patterns. The goal is to give customers the flexibility to build environments that truly replicate their unique production network, effectively creating a digital twin of their environment for accurate performance and security validation.
+
+- We can now make some changes to the test objective for testing throughput and to include the aforementioned applications to our mix of traffic. Click on top-right **Overview** to go back to the test configuration page, then edit the **Objectives & Timeline** section.
 
 ![alt text](../Docs/images/lab-06/lab6-12.png)
 
@@ -121,11 +140,30 @@ In this case, we will be using **ens6** IP address.
 
 ![alt text](../Docs/images/lab-06/lab6-14.png)
 
-- Restart the test by clicking on **START TEST** (blue play icon) to initiate the test and observe the new metrics. In the Statistics, on the left hand side selection panel, click on the **Client Application Profile** to see the breakdown of the traffic per application.
+- Start the test by clicking on **START TEST** (blue play icon) to initiate the test and observe the new metrics. In the Statistics, on the left hand side selection panel, click on the **Client Application Profile** to see the breakdown of the traffic per application.
 
 ![alt text](../Docs/images/lab-06/lab6-15.png)
 
+- CyPerf goes to great lengths to accurately emulate the behavior of complex modern applications, providing a detailed breakdown of each application action so users can identify issues in specific interactions, for example, a failed file upload.
+- Click on the ***Ofice365 OneDrive*** application to see more details.
+
+![alt text](../Docs/images/lab-06/lab6-20.png)
+
+
 - Wait until the test stops.
+
+### High-Realism Security + Application Testing
+
+- This stage introduces the highest level of complexity and realism. The same CyPerf agents now emulate both **real applications** and **high-severity security attacks**, including **AI-driven prompt-injection techniques**. This is where a real network and its security systems are pushed to their true operational limits.
+
+- Why is this stage important?
+    - ***End-to-End Realism***: CyPerf emulates both clients and servers, generating traffic that closely matches what would be observed in a real network, including application flows, user behaviors, and malicious interactions.
+    - ***Full Security Stack Under Test***: Any inline system that looks at Layer 4 or higher, such as the Firewall, IPS, WAF, Anti-DDoS, SASE gateways, API gateways, or other security controls, naturally becomes the System Under Test (SUT).
+    - ***Evaluates Security and Performance Together***: The purpose is not just to check whether the device blocks all attacks. It is to understand how well the system performs while blocking attacks and simultaneously serving legitimate business traffic.
+    - ***Reveals Hidden Trade-Offs***: Many security products degrade business KPIs when stricter policies are enabled (e.g., throughput drops, latency spikes, connection failures). These tests expose the performance penalties of increased security settings.
+    - ***Quantifies Security Efficacy Under Load***: hows how the security system behaves when it has to inspect and mitigate attacks at scale, including complex threats and AI-based evasions.
+    - ***Measures Business Impact***: Helps determine exactly how much security inspection slows down or disrupts real applications, critical for production readiness.
+    - ***Supports Policy Tuning***: Allows teams to find the right balance between strong security controls and acceptable user experience
 
 - We can now enable the **ATTACK PROFILE** to simulate some attacks. 
 - Go back to the **Overview** page and then click on the **TEST SETTINGS** section. We're adding 2 attack profiles: **Critical Strikes** and **All Dan Gemini AI LLM Prompt Injection**. 
@@ -141,6 +179,17 @@ In this case, we will be using **ens6** IP address.
 
 ![alt text](../Docs/images/lab-06/lab6-18.png)
 
+- Now that you’ve reached the most realistic and complex stage of testing, this is a good time to explore CyPerf’s detailed statistics views. These help you diagnose issues across the full stack, from L4/L7 behavior to agent resource limits.
+
+- Key metrics and views to examine:
+
+    - ***TCP Statistics*** Review TCP-level behavior such as connection resets, retransmissions, timeouts, SYN failures, window size issues, and handshake anomalies.
+    - ***Agent Traffic Statistics (Layer 2/3)*** Understand low-level packet behavior including packet rates (pps), NIC ingress/egress failures, packet drops, arp, dns, and link-level anomalies.
+    - ***Agent Resource Metrics*** Monitor CPU, memory, and interface utilization of the agents generating traffic to ensure the load is realistic and not agent limited.
+    - ***Client HTTP Statistics*** Examine client-side HTTP metrics such as transaction success/fail counts, response classes (2xx, 3xx, 4xx, 5xx),  TLS issues etc
+    - ***Server HTTP Statistics***  Since both clients and server stats are independently published, you can check and compare them to detect anomalies.
+    - ***Packet captures*** Find out ways to enable and download captures in CyPerf.
+ 
 
 ## Cleanup
 

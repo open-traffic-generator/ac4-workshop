@@ -73,7 +73,6 @@ docker run -d --name=keng-controller --network host ghcr.io/open-traffic-generat
 --accept-eula \
 --http-port 8443
 ```
-
 - On VM1 deploy the Ixia-C traffic engine. Notice the nic name **ens6**  used.
 ```Shell
 docker run --privileged -d                    \

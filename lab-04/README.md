@@ -22,8 +22,8 @@ python3 -m pip install --upgrade snappi --break-system-packages
 - Install [**kind**](https://kind.sigs.k8s.io/). This will allow us to create a single node kubernetes cluster.
 
 ```Shell
-[ $(uname -m) = x86_64 ] && curl -Lo ./kind https://kind.sigs.k8s.io/dl/v0.30.0/kind-linux-amd64
-cd && chmod +x ./kind
+cd && [ $(uname -m) = x86_64 ] && curl -Lo ./kind https://kind.sigs.k8s.io/dl/v0.30.0/kind-linux-amd64
+chmod +x ./kind
 sudo mv ./kind /usr/local/bin/kind
 ```
 
@@ -104,7 +104,8 @@ show running-config
 ```
 
 
-- As you can see the dut is already configured with basic interfaces and BGP configuration. Let's open **lab-04-1_test.py** script and update the controller address and ports location.
+- As you can see the dut is already configured with basic interfaces and BGP configuration. 
+- Let's open **lab-04-1_test.py** script and update the controller address and ports location. Because we're using the https transport, the address to use should be the external IP for the **service-https-otg-controller** service retrieved in the previous steps.
 
 ![alt text](../Docs/images/lab-04/lab4-4.png)
 
@@ -127,7 +128,7 @@ cd ~/ac4-workshop/lab-04/ && python3 lab-04-1_test.py
 
 ![alt text](../Docs/images/lab-04/lab4-6.png)
 
-- Let's open the gosnappi version of the same script, **lab-04-2_test.go** and update the controller address and ports location. This time we will use the grpc transport instead of http. Notice the transport change in the code. The otg-controller is listening on port 40051 for grpc connections.
+- Let's open the gosnappi version of the same script, **lab-04-2_test.go** and update the controller address and ports location. This time we will use the grpc transport instead of https. Notice the transport change in the code. The otg-controller is listening on port 40051 for grpc connections and the address to use should be the external IP for the **service-grpc-otg-controller** service retrieved in the previous steps.
 
 ![alt text](../Docs/images/lab-04/lab4-7.png)
 
