@@ -1,27 +1,19 @@
 # Lab 05 Instructions
 
-## Lab Objective
+## Overview
 
-
-To deploy [**CyPerfCE**](https://www.cyperf.com/) VM's and run a stateful connection and transaction rate test to stress the network's compute and packet-per-second capacity. 
-We would be looking at Connections Per Second as our KPI.
-
-## Hardware Requirements
-
-We will require 2 VMs for this lab to act as server agent and client agent. These VM's have been spun up as part of your lab environment. 
-
-
-- VM2 as cyperf-ce server
-
-- VM1 as cyperf-ce client
-
-Deployment and logical topology below.
+In this lab we will use [**CyPerfCE**](https://www.cyperf.com/) agents to run a stateful connection and transaction rate test to stress the network's compute and packet-per-second capacity. VM1 will act as the cyperf-ce client and VM2 as cyperf-ce server. These VM's have been spun up as part of your lab environment and we would be looking at Connections Per Second as our Key Performance Indicator (KPI). 
 
 ![alt text](../Docs/images/lab-05/lab5-1.png)
 
+Deployment topology below.
+
+![alt text](../Docs/images/lab-05/lab5-13.png)
+
+
 ## Prerequisites
 
-- Two networked systems (Virtual Machines or Containers) capable of communicating with each other - Cyperf-CE server(VM2) and other as cyperf-CE client (VM1)
+- Two networked systems (Virtual Machines or Containers) capable of communicating with each other - Cyperf-CE server(VM2) and other as Cyperf-CE client (VM1)
 - CyPerf Community Edition installed on both systems. Explained further in "Phase 1"
 
 ## Step-by-Step Procedure
@@ -38,23 +30,16 @@ chmod +x setup_cyperf_on_agent.sh
 
 ### Phase 2.1: Deploying the Server Agent on VM2
 
-- Let us use VM2 as the "Cyperf CE Server" agent, which will passively wait for connection requests from the "Cyperf CE Client" agent (VM1).
+- VM2 is used as the "Cyperf CE Server" agent, which will passively wait for connection requests from the "Cyperf CE Client" agent (VM1).
 - On VM2 start the server process. 
-
-***Connection rate test with default limits***
 
 ```bash
 sudo cyperf -s --cps 
 ```
 
-** Bonus: You can also run connection rate test with custom payload size. 
+** Bonus: You can run connection rate test with custom payload size `sudo cyperf -s --cps –-length 1k`
 
-
-```bash
-sudo cyperf -s --cps –-length 1k
-```
-
-This cyperf server agent will bind to all the IP address on VM2 unless we specify --bind <ip> in the command.  In our lab we will be using 'ens6' - 10.0.2.22 as server IP
+This cyperf server agent will bind to all the IP address on VM2 unless we specify *--bind 'ip'* in the command.  In our lab we will be using **ens6** - 10.0.2.22 as server IP
 
 ** Note this IP address as it would be your server ip address that client will connect to. Let's call it **SERVER_IP_ADDR**.
 
@@ -67,57 +52,40 @@ You can explore various options and their explanations at [Cyperf Options](https
 ### Phase 2.2: Deploying the Client Agent on VM1
 
 - The second step is to use the "Cyperf CE Client" agent on VM1 to initiate a stateful connection test against the Server (VM2), targeting a specific Connections Per Second (CPS).
-- On VM1 start the client process with below command. Replace **SERVER_IP_ADDR** with actual server ip address noted in previous step.
+- On VM1 start the client process with below command. Replace **SERVER_IP_ADDR** with actual server ip address noted in previous step. If multiple interfaces on client VM, you can chosse the interface to use to send traffic to server using *--bind* option. By default, cyperf will select the required IP address and interface from linux route table.
 
-For our lab it is 'ens6' - 10.0.2.12 on VM1
+- On VM1 we're setting the connection rate test with target CPS of 1000 connections per second `sudo cyperf -c SERVER_IP_ADDR --cps 1000`
 
-If multiple interfaces on client VM, you can chosse the interface to use to send traffic to server using '--bind' option. By default, cyperf will select the required IP address and interface from linux route table.
-
-***Connection rate test with target CPS of 1000 connections per second***
-
-`
-sudo cyperf -c SERVER_IP_ADDR --cps 1000
-`
-
-For this lab:
 ```bash
 sudo cyperf -c 10.0.2.22 --cps 1000
 ```
 
-** Bonus: Along with the CPS goal you can also set the packet size for CPS test. Smaller packets get you better CPS results.
+** Bonus: Along with the CPS goal you can also set the packet size for CPS test. Smaller packets get you better CPS results `sudo cyperf -c SERVER_IP_ADDR --cps 10k/s --length 1`
 
-`
-sudo cyperf -c SERVER_IP_ADDR --cps 10k/s --length 1
-`
 
-For this lab:
-```bash
-sudo cyperf -c 10.0.2.22 --cps 10k/s --length 1
-```
-
-See trace as below on you Client VM.
+See trace as below on your Client VM.
 
 ![alt text](../Docs/images/lab-05/lab5-4.png)
 
 
 ### Phase 3: Statistics Analysis
 
-Observe the results that would be continuously running on both your VM's. Pay attention to "Connection Rate" statistics since that is our KPI for this test.
+- Observe the results that would be continuously running on both your VM's. Pay attention to "Connection Rate" statistics since that is our KPI for this test.
 
 ![alt text](../Docs/images/lab-05/lab5-3.png)
 
 ### Phase 3: Stop the Test
 
-- can stop the test manually from client VM agent manually (Ctrl+C) 
+- You can stop the test manually from client VM agent manually (Ctrl+C) 
 
   OR
 
-- You can use '--time' flag on client side to setup a test run duration before the test run
+- You can use *--time* flag on client side to setup a test run duration before the test run.
 
 
 ### Phase 4: Test Summary
 
-You will be able to see the test run summary snapshot of Connections Per Second(CPS) KPI 
+- You will be able to see the test run summary snapshot of Connections Per Second(CPS) KPI 
 
 ![alt text](../Docs/images/lab-05/lab5-5.png)
 
@@ -162,7 +130,7 @@ This option cannot be used together with --bidir option*
 
 
 ### Phase 6: Cleanup
-On your server VM, Ctrl+C the Server to stop it.
+- On VM2, Ctrl+C the Server to stop it.
 
 ### Conclusion
 
@@ -193,56 +161,46 @@ Want to push your network to its absolute limits? In this **BONUS LAB**, we'll s
 
 ### How to Run a Throughput Test
 
-#### Phase 1.1. **Deploying the Server Agent on VM2**
+#### Phase 1.1. *Deploying the Server Agent on VM2*
 
-SSH into your **server VM** and start the server to listen for throughput tests:
+- On VM2 and start the server to listen for throughput tests:
 
 ```bash
 sudo cyperf -s
 ```
-Note <SERVER_IP_ADDR> to be used with client agent in next step.
+
+Note **SERVER_IP_ADDR** to be used with client agent in next step.
 
 #### Phase 1.2. **Deploying the Client Agent on VM1**
 
-SSH into the **client VM** and run the following command, replacing `<SERVER_IP_ADDR>` with your server's actual IP address:
+- On VM1 run the following command, replacing **SERVER_IP_ADDR** with your saved IP address `sudo cyperf -c 'SERVER_IP_ADDR' -b 'target_throughput'`. We'll use the parameter *-b, --bitrate*. This is the target bitrate in bits/second. The default is 10G/s with maximum of 10G/s. This option cannot be used with --cps option.
 
-`
-sudo cyperf -c <SERVER_IP_ADDR> -b <target_throughput>
-`
-
-For this lab:
-```bash
-sudo cyperf -c 10.0.2.22 -b 5G/s
-```
 
 ```bash
--b, --bitrate #[KMG][/#]	Target bitrate in bits/second.
-
-Default: 10G/s 
-Max: 10G/s
-This option cannot be used with --cps option.
+sudo cyperf -c 10.0.2.22 -b 2G/s --time 60
 ```
+
+
 ![alt text](../Docs/images/lab-05/lab5-8.png)
 
 #### 3. **Customize Your Test!**
 
-You can add additional optional arguments, such as:
-
-- `--time 60`  (Run the test for 60 seconds)
-- `--length 1400`  (Use 1400-byte packets)
+You can add additional optional arguments, such as:`--length 1400`  (Use 1400-byte packets)
 
 #### 4. **Read the Output**
 
-After the test completes, you'll see reports showing total throughput (in Mbps/Gbps), latency, retransmissions, and more. Use --detailed-stats for detailed result analysis
+- Side by side stats on Client and Server VM's.
 
 ![alt text](../Docs/images/lab-05/lab5-9.png)
 
-
-> Test Summary
-
+- After the test completes, you'll see reports showing total throughput (in Mbps/Gbps), latency, retransmissions, and more. Use *--detailed-stats* for detailed result analysis.
+- Test Summary on the Client VM1
 
 ![alt text](../Docs/images/lab-05/lab5-10.png)
 
+- Test Summary on the Server VM2
+
+![alt text](../Docs/images/lab-05/lab5-14.png)
 
 
 ### If Iperf... then Why CyPerf?

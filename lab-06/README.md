@@ -11,7 +11,7 @@ We will assign **VM1** as Cyperf Client Agent and **VM2** as Cyperf Server Agent
 
 ## Client Configuration
 
-- On VM1 creat the client docker network. Create a network with the subnet 172.21.X.0/24 where **X** is your assigned student number.
+- On VM1 creat the client docker network. Create a network with the subnet 172.21.X.0/24 where **X** is your assigned **STUDENT_NUMBER**.
 
 ```Shell
 docker network create --subnet=172.21.x.0/24 cyperf_mgmt_net
@@ -34,7 +34,7 @@ public.ecr.aws/keysight/cyperf-agent:latest
 
 ## Server Configuration
 
-- On VM2 creat the server docker network. Create a network with the subnet 172.21.X.0/24 where **X** is your assigned student number.
+- On VM2 creat the server docker network. Create a network with the subnet 172.21.X.0/24 where **X** is your assigned **STUDENT_NUMBER**.
 
 ```Shell
 docker network create --subnet=172.21.x.0/24 cyperf_mgmt_net
@@ -83,7 +83,7 @@ In this case, we will be using **ens6** IP address.
 
 ![alt text](../Docs/images/lab-06/lab6-10.png)
 
-- You should find 2 addresses `172.21.X.4` and `172.21.X.5`, where **X** is your assigned student number. In my example I used 172.21.6.4 while deploying the client docker agent. In your case it should be `172.21.X.4`. Select that and click Update.
+- You should find 2 addresses `172.21.X.4` and `172.21.X.5`, where **X** is your assigned **STUDENT_NUMBER**. In my example I used 172.21.6.4 while deploying the client docker agent. In your case it should be `172.21.X.4`. Select that and click Update.
 
 ![alt text](../Docs/images/lab-06/lab6-4.png)
 
