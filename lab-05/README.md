@@ -148,6 +148,9 @@ This test is critical because it goes beyond simple throughput measurements to e
 This validation provides the necessary assurance of performance at scale for critical infrastructure.
 
 
+[**CyperfCE FAQ**](CyperfCE_FAQ.md)
+
+
 ---
 
 ## 🚀 **BONUS SECTION: Running Throughput Tests with CyPerf CE!**
@@ -207,5 +210,7 @@ You can add additional optional arguments, such as: `--length 1400`  (Use 1400-b
 Curious how CyPerf differs from the popular tool Iperf? CyPerf offers unique test workflows and cloud-native features designed for modern distributed architectures. 
 
 [**Tell me**](IperfVsCyperf.md)
+
+
 
 
