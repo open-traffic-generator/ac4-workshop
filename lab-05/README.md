@@ -131,7 +131,7 @@ This option cannot be used together with --bidir option*
 
 
 ### Phase 6: Cleanup
-- On VM2, Ctrl+C the Server to stop it.
+- On VM2, unless already stopped, you can stop the server with **Ctrl+C**
 
 ### Conclusion
 
@@ -170,11 +170,9 @@ Want to push your network to its absolute limits? In this **BONUS LAB**, we'll s
 sudo cyperf -s
 ```
 
-Note **SERVER_IP_ADDR** to be used with client agent in next step.
-
 #### Phase 1.2. **Deploying the Client Agent on VM1**
 
-- On VM1 run the following command, replacing **SERVER_IP_ADDR** with your saved IP address `sudo cyperf -c 'SERVER_IP_ADDR' -b 'target_throughput'`. We'll use the parameter *-b, --bitrate*. This is the target bitrate in bits/second. The default is 10G/s with maximum of 10G/s. This option cannot be used with --cps option.
+- On VM1 run the following command, replacing **SERVER_IP_ADDR** with your saved IP address from the CPS test. `sudo cyperf -c 'SERVER_IP_ADDR' -b 'target_throughput'`. We'll use the parameter *-b, --bitrate*. This is the target bitrate in bits/second with the default of 10G/s and a maximum of 10G/s. This option cannot be used with *--cps* option.
 
 
 ```bash
@@ -186,7 +184,7 @@ sudo cyperf -c 10.0.2.22 -b 2G/s --time 60
 
 #### 3. **Customize Your Test!**
 
-You can add additional optional arguments, such as:`--length 1400`  (Use 1400-byte packets)
+You can add additional optional arguments, such as: `--length 1400`  (Use 1400-byte packets)
 
 #### 4. **Read the Output**
 
