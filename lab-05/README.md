@@ -39,7 +39,7 @@ sudo cyperf -s --cps
 
 ** Bonus: You can run connection rate test with custom payload size `sudo cyperf -s --cps –-length 1k`
 
-This cyperf server agent will bind to all the IP address on VM2 unless we specify *--bind 'ip'* in the command.  In our lab we will be using **ens6** - 10.0.2.22 as server IP
+This cyperf server agent will bind to all the IP addresses on VM2 unless we specify *--bind 'ip'* in the command.  In our lab we will be using **ens6** - 10.0.2.22 as server IP
 
 ** Note this IP address as it would be your server ip address that client will connect to. Let's call it **SERVER_IP_ADDR**.
 
@@ -52,7 +52,7 @@ You can explore various options and their explanations at [Cyperf Options](https
 ### Phase 2.2: Deploying the Client Agent on VM1
 
 - The second step is to use the "Cyperf CE Client" agent on VM1 to initiate a stateful connection test against the Server (VM2), targeting a specific Connections Per Second (CPS).
-- On VM1 start the client process with below command. Replace **SERVER_IP_ADDR** with actual server ip address noted in previous step. If multiple interfaces on client VM, you can chosse the interface to use to send traffic to server using *--bind* option. By default, cyperf will select the required IP address and interface from linux route table.
+- On VM1 start the client process with below command. Replace **SERVER_IP_ADDR** with actual server ip address noted in previous step. If multiple interfaces on client VM, you can choose the active interface by using the *--bind* option. By default, cyperf will select the required IP address and interface from linux route table based on the destination.
 
 - On VM1 we're setting the connection rate test with target CPS of 1000 connections per second `sudo cyperf -c SERVER_IP_ADDR --cps 1000`
 
@@ -76,11 +76,11 @@ See trace as below on your Client VM.
 
 ### Phase 3: Stop the Test
 
-- You can stop the test manually from client VM agent manually (Ctrl+C) 
+- On VM1 you can stop the test manually with **Ctrl+C** after running for a desired duration.
 
   OR
 
-- You can use *--time* flag on client side to setup a test run duration before the test run.
+- The test would have stopped automatically if the *--time* flag was used upon starting the test in the previous step. For example, to run the test for 2 minutes, you would start the client with the following command: `sudo cyperf -c SERVER_IP_ADDR --cps 1000 --time 120`
 
 
 ### Phase 4: Test Summary
@@ -99,6 +99,7 @@ If we need a flag to be added on server side VM as well, it will be specified in
 **--parallel / -P**  *Number of parallel client sessions to run. Tuning this option can help in improving bitrate and connection rate. Default: Number of available CPU cores. Max: 64000*
 
 ![alt text](../Docs/images/lab-05/lab5-6.png)
+
 
 **--bind  'interface ip'** *Bind to the interface associated with the IP address . If multiple interfaces on client VM, you can chosse the interface to use to send traffic to server.
 Default: Cyperf will select the required IP address and interface from linux route table.*
@@ -205,17 +206,8 @@ You can add additional optional arguments, such as:`--length 1400`  (Use 1400-by
 
 ### If Iperf... then Why CyPerf?
 
-Curious how CyPerf differs from the popular tool Iperf? CyPerf offers unique test workflows and cloud-native features designed for modern distributed architectures.
+Curious how CyPerf differs from the popular tool Iperf? CyPerf offers unique test workflows and cloud-native features designed for modern distributed architectures. 
 
 [**Tell me**](IperfVsCyperf.md)
-
-
----
-
-**Give it a try and see how much data your setup can move!**
-
-> *Note: You can always refer to the CyPerf CE documentation or `cyperf` for a full list of configurable options.*
-
----
 
 
