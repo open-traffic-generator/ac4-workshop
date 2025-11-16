@@ -86,7 +86,7 @@ There was packet loss during the link down event. The convergence time is displa
 ![alt text](../Docs/images/lab-02/lab2-11.png)
 
 - Now let's try to manually withdraw the routes from P2. The traffic should flow without any packet loss towards P3.
-  We will need the traffic to run continuously. Open **lab-02.py**, set the packet count to **6000000** packets, save and run.
+  We will need the traffic to run longer. Open **lab-02.py**, set the packet count to **6000000** packets, save and run.
 
 ```Shell
 python3 lab-02.py
