@@ -10,6 +10,7 @@ We will only require 1 VM for this lab. Deployment and logical topology below.
 
 ![alt text](../Docs/images/lab-03/lab3-1.png)
 
+
 ## Prerequisites
 
 - If **containerlab** is not installed please do so.
