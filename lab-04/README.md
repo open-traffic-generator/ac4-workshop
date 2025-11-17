@@ -144,7 +144,9 @@ go test -v lab-04-2_test.go
 
 ![alt text](../Docs/images/lab-04/lab4-8.png)
 
-- Let's run some gnmi commands against the otg-controller pod to verify the BGP state. The otg gnmi server is listening on port 50051 and the external IP address can be retrieved from the k8s services list above. With otg we can use gnmi for telemetry only and the "yang" models supported are listed here [otg yang models](https://github.com/open-traffic-generator/models-yang/tree/main/artifacts). 
+- With otg we can use **gnmi** protocol for telemetry (statistics) and the "yang" models supported are listed here [otg yang models](https://github.com/open-traffic-generator/models-yang/tree/main/artifacts). 
+- The otg gnmi server is listening on port 50051 and the IP address is that of the **service-gnmi-otg-controller** retrieved by the `kubectl get services -n ixia-c-ceos` command in the previous steps. 
+- Run the commands below to retrieve stats on flows, ports and bgp peer information using gnmi.
 
 ```Shell
 gnmic -a 172.18.0.51:50051 --skip-verify -u admin -p admin get --path "/flows"
