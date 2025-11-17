@@ -21,7 +21,7 @@ docker network create --subnet=172.21.x.0/24 cyperf_mgmt_net
 
 - Use your name to label the container properly. For example, if your name is John, use: ***--name john-client***
 - Each student should replace ***CONTROLLER_ADDRESS*** with the IP address of the controller VM provided in your lab environment.
-- Assign Client IP Address. Choose an IP address within the **172.21.X.0/24** subnet, ensuring it’s different from the server’s IP. Example: **172.21.6.4**
+- Assign Client IP Address. Choose an IP address within the **172.21.X.0/24** subnet, ensuring it’s different from the server’s IP, which we'll configure later. Example: **172.21.6.4**
 
 - Deploy the Client Agent. The CyPerf agent image may take a little while to download. Deploy the client using the command below.
 
