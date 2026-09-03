@@ -1,0 +1,39 @@
+name: lab-02-1
+topology:
+  nodes:
+    controller:
+      kind: linux
+      image: ghcr.io/open-traffic-generator/keng-controller:1.61.0-1
+      cmd: --accept-eula --http-port 8443
+      env:
+        LICENSE_SERVERS: 10.24.50.148
+      ports:
+        - 8443:8443
+    traffic-engine:
+      kind: linux
+      image: ghcr.io/open-traffic-generator/ixia-c-traffic-engine:1.8.0.544
+      env:
+        OPT_LISTEN_PORT: 5551
+        ARG_IFACE_LIST: virtual@af_packet,eth1 virtual@af_packet,eth2 virtual@af_packet,eth3 virtual@af_packet,eth4 virtual@af_packet,eth5
+        OPT_NO_HUGEPAGES: Yes
+        OPT_NO_PINNING: Yes
+        OPT_MEMORY: 1024
+        WAIT_FOR_IFACE: Yes
+    protocol-engine:
+      kind: linux
+      image: ghcr.io/open-traffic-generator/ixia-c-protocol-engine:1.00.0.534
+      network-mode: container:traffic-engine
+      startup-delay: 5
+      env:
+        INTF_LIST: eth1,eth2,eth3,eth4,eth5
+    ceos:
+      kind: arista_ceos
+      image: ceos:latest
+      startup-config: lab-02.1-ceos.cfg
+
+  links:
+    - endpoints: ["traffic-engine:eth1","ceos:eth1"]
+    - endpoints: ["traffic-engine:eth2","ceos:eth2"]
+    - endpoints: ["traffic-engine:eth3","ceos:eth3"]
+    - endpoints: ["traffic-engine:eth4","ceos:eth4"]
+    - endpoints: ["traffic-engine:eth5","ceos:eth5"]

@@ -130,4 +130,12 @@ curl -k -X POST https://clab-lab-02-controller:8443/control/state -d @body-stop-
 cd ~/ac4-workshop/lab-02/ && clab destroy --cleanup
 ```
 
+## Lab 02.1 Summary
 
+- This lab was created to showcase the use of a license server to run tests beyound what the community edition allows.
+- Here we are using 5 ports (maximum community edition allows is 4 ports).
+- The lab also showcases the use of single traffic engine / protocol engine pair which support multiple nics on the same container.
+- The assignment of port location in the snappi script is done slightly different than the previous lab (e.g: **clab-lab-02-1-traffic-engine:5551;1+clab-lab-02-1-traffic-engine:50071;eth1**)
+  - The port number after the traffic engine container name: tcp listening port
+  - The name of that interface after the protocol engine container name: tcp listening port
+  
